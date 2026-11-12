@@ -1,0 +1,2279 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>F1, 처음이세요? | F1 Beginner Experience (2026 Season)</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & Noto Sans KR & Orbitron (for racing numbers/speed) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Noto+Sans+KR:wght@400;500;700;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  <!-- Font Awesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Tone.js for subtle optional sound effects (no external URLs) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans KR"', 'Inter', 'sans-serif'],
+            racing: ['Orbitron', 'Inter', 'sans-serif'],
+          },
+          colors: {
+            f1red: '#E10600',
+            f1dark: '#15151E',
+            f1card: '#1F1F2B',
+            f1border: '#2E2E3E',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Animations & Racing Aesthetics */
+    body {
+      background-color: #15151E;
+      color: #FFFFFF;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    /* Racing Track Speed Lines Animation */
+    @keyframes speedLine {
+      0% { transform: translateX(100vw); opacity: 0; }
+      20% { opacity: 0.8; }
+      80% { opacity: 0.8; }
+      100% { transform: translateX(-100vw); opacity: 0; }
+    }
+
+    .speed-line {
+      position: absolute;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #E10600, #FFFFFF);
+      animation: speedLine linear infinite;
+      pointer-events: none;
+    }
+
+    /* Hero Car Subtle Hover/Vibration */
+    @keyframes engineIdle {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-2px); }
+    }
+    .car-idle {
+      animation: engineIdle 0.35s ease-in-out infinite;
+    }
+
+    /* Hotspot Pulse */
+    @keyframes pulseRing {
+      0% { transform: scale(0.85); opacity: 0.9; }
+      70% { transform: scale(1.6); opacity: 0; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+    .hotspot-pulse::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 9999px;
+      border: 2px solid #E10600;
+      animation: pulseRing 1.8s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #15151E;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #38384A;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #E10600;
+    }
+
+    /* F1 Kerb Stripe Border */
+    .f1-kerb {
+      background: repeating-linear-gradient(
+        -45deg,
+        #E10600,
+        #E10600 12px,
+        #FFFFFF 12px,
+        #FFFFFF 24px
+      );
+    }
+
+    /* Tire Spin Animation */
+    @keyframes spinFast {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin-fast {
+      animation: spinFast 0.15s linear infinite;
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-f1red selection:text-white">
+
+  <!-- Top Progress & Navigation Header -->
+  <header class="sticky top-0 z-50 bg-f1dark/95 backdrop-blur-md border-b border-f1border">
+    <!-- Learning Progress Bar -->
+    <div class="w-full h-1 bg-gray-800">
+      <div id="global-progress-bar" class="h-full bg-f1red transition-all duration-500" style="width: 14%;"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo -->
+        <button onclick="navigateTo('home')" class="flex items-center space-x-2.5 text-left group focus:outline-none">
+          <div class="bg-f1red text-white font-racing font-black italic px-2.5 py-1 rounded-tl-lg rounded-br-lg text-lg tracking-wider group-hover:scale-105 transition-transform">
+            F1
+          </div>
+          <div>
+            <span class="font-bold text-white tracking-tight text-base sm:text-lg block leading-none">처음이세요?</span>
+            <span class="text-[10px] text-gray-400 font-racing tracking-widest uppercase">2026 Season Guide</span>
+          </div>
+        </button>
+
+        <!-- Desktop Navigation -->
+        <nav class="hidden lg:flex items-center space-x-1">
+          <button onclick="navigateTo('intro')" data-nav="intro" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition">A. F1이란?</button>
+          <button onclick="navigateTo('teams')" data-nav="teams" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition">B. 팀 & 드라이버</button>
+          <button onclick="navigateTo('car')" data-nav="car" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition">C. F1 머신</button>
+          <button onclick="navigateTo('weekend')" data-nav="weekend" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition">D. 경기 방식</button>
+          <button onclick="navigateTo('play')" data-nav="play" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition">E. 직접 체험</button>
+          <button onclick="navigateTo('broadcast')" data-nav="broadcast" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition">F. 중계 화면</button>
+          <button onclick="navigateTo('quiz')" data-nav="quiz" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition">G. 입문 퀴즈</button>
+        </nav>
+
+        <!-- Status Badge & Mobile Menu Toggle -->
+        <div class="flex items-center space-x-3">
+          <div class="hidden sm:flex items-center bg-f1card border border-f1border px-3 py-1.5 rounded-full text-xs">
+            <span class="w-2 h-2 rounded-full bg-f1red mr-2 animate-pulse"></span>
+            <span class="text-gray-300">학습 진도: <strong id="progress-text" class="text-white">1/7</strong></span>
+          </div>
+          <button id="mobile-menu-btn" onclick="toggleMobileMenu()" class="lg:hidden p-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 focus:outline-none" aria-label="메뉴 열기">
+            <i class="fa-solid fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobile-menu" class="hidden lg:hidden bg-f1card border-b border-f1border px-4 pt-2 pb-4 space-y-1">
+      <button onclick="navigateTo('home'); toggleMobileMenu()" class="block w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-gray-200 hover:bg-f1red/20">🏠 홈으로</button>
+      <button onclick="navigateTo('intro'); toggleMobileMenu()" class="block w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-gray-200 hover:bg-f1red/20">A. F1은 어떤 스포츠일까?</button>
+      <button onclick="navigateTo('teams'); toggleMobileMenu()" class="block w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-gray-200 hover:bg-f1red/20">B. 2026 팀과 드라이버</button>
+      <button onclick="navigateTo('car'); toggleMobileMenu()" class="block w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-gray-200 hover:bg-f1red/20">C. F1 자동차 알아보기</button>
+      <button onclick="navigateTo('weekend'); toggleMobileMenu()" class="block w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-gray-200 hover:bg-f1red/20">D. F1 경기 진행 방식</button>
+      <button onclick="navigateTo('play'); toggleMobileMenu()" class="block w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-gray-200 hover:bg-f1red/20">E. 직접 체험하기 (미니게임)</button>
+      <button onclick="navigateTo('broadcast'); toggleMobileMenu()" class="block w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-gray-200 hover:bg-f1red/20">F. F1 중계 화면 읽기</button>
+      <button onclick="navigateTo('quiz'); toggleMobileMenu()" class="block w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-gray-200 hover:bg-f1red/20">G. F1 입문자 퀴즈</button>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="min-h-[calc(100vh-4rem)]">
+
+    <!-- ==================== HERO / HOME VIEW ==================== -->
+    <section id="view-home" class="view-section relative overflow-hidden">
+      <!-- Animated Speed Lines Background -->
+      <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-40" id="hero-speed-lines"></div>
+      
+      <!-- Radial Glow -->
+      <div class="absolute -top-24 -right-24 w-96 h-96 bg-f1red/20 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 relative z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <!-- Left Copy & CTA -->
+          <div class="lg:col-span-7 space-y-6">
+            <div class="inline-flex items-center space-x-2 bg-f1card border border-f1border px-3.5 py-1.5 rounded-full">
+              <span class="bg-f1red text-white text-xs font-bold px-2 py-0.5 rounded-full">2026 시즌 기준</span>
+              <span class="text-xs sm:text-sm text-gray-300 font-medium">11개 팀 · 22명의 드라이버 · 새로운 시대의 F1</span>
+            </div>
+
+            <h1 class="text-4xl sm:text-6xl font-black tracking-tight leading-tight">
+              <span class="text-white block">F1, 처음이세요?</span>
+              <span class="text-transparent bg-clip-text bg-gradient-to-r from-f1red via-red-500 to-white block mt-2">
+                속도에 빠지는 가장 쉬운 방법.
+              </span>
+            </h1>
+
+            <p class="text-gray-300 text-base sm:text-lg max-w-2xl leading-relaxed">
+              복잡한 자동차 공학 용어는 잠시 잊으세요! 시속 350km의 짜릿한 추월, 2초 만에 끝나는 타이어 교체, 그리고 2026년 새롭게 바뀐 F1의 매력을 직접 만지고 체험하며 알아보세요.
+            </p>
+
+            <!-- Primary CTA Buttons -->
+            <div class="flex flex-wrap gap-3 sm:gap-4 pt-2">
+              <button onclick="navigateTo('intro')" class="flex-1 sm:flex-none bg-f1red hover:bg-red-700 text-white font-bold px-7 py-4 rounded-xl shadow-lg shadow-f1red/30 transition-all transform hover:-translate-y-0.5 flex items-center justify-center space-x-2 text-base">
+                <span>F1 입문 시작하기</span>
+                <i class="fa-solid fa-flag-checkered"></i>
+              </button>
+              <button onclick="navigateTo('play')" class="flex-1 sm:flex-none bg-white text-f1dark hover:bg-gray-100 font-bold px-7 py-4 rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5 flex items-center justify-center space-x-2 text-base">
+                <i class="fa-solid fa-gamepad text-f1red"></i>
+                <span>직접 체험하기</span>
+              </button>
+              <button onclick="openTeamFinderDirectly()" class="w-full sm:w-auto bg-f1card hover:bg-f1border border border-f1border text-white font-bold px-6 py-4 rounded-xl transition-all flex items-center justify-center space-x-2 text-base">
+                <i class="fa-solid fa-heart text-f1red"></i>
+                <span>나의 F1 팀 찾기</span>
+              </button>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-3 gap-4 pt-6 border-t border-f1border/80">
+              <div>
+                <div class="font-racing text-2xl sm:text-3xl font-black text-white">350<span class="text-f1red text-base ml-1">km/h</span></div>
+                <div class="text-xs text-gray-400 mt-0.5">최고 직선 속도</div>
+              </div>
+              <div>
+                <div class="font-racing text-2xl sm:text-3xl font-black text-white">~1.8<span class="text-f1red text-base ml-1">초</span></div>
+                <div class="text-xs text-gray-400 mt-0.5">타이어 4개 교체 시간</div>
+              </div>
+              <div>
+                <div class="font-racing text-2xl sm:text-3xl font-black text-white">11<span class="text-f1red text-base ml-1">팀</span></div>
+                <div class="text-xs text-gray-400 mt-0.5">2026 참가 컨스트럭터</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Dynamic SVG F1 Car Showcase -->
+          <div class="lg:col-span-5">
+            <div class="relative bg-gradient-to-br from-f1card to-f1dark border border-f1border rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden">
+              <div class="flex justify-between items-center mb-4">
+                <span class="text-xs font-racing text-f1red tracking-widest uppercase font-bold">2026 SPEC CONCEPT</span>
+                <span class="text-xs bg-white/10 px-2.5 py-1 rounded-full text-gray-300">Active Aero · 50:50 Hybrid</span>
+              </div>
+
+              <!-- Stylized Dynamic F1 Car Illustration (SVG) -->
+              <div class="py-6 car-idle">
+                <svg viewBox="0 0 600 220" class="w-full h-auto drop-shadow-[0_15px_25px_rgba(225,6,0,0.35)]">
+                  <!-- Track Shadow -->
+                  <ellipse cx="300" cy="188" rx="260" ry="12" fill="rgba(0,0,0,0.6)" />
+                  <!-- Rear Wing -->
+                  <path d="M55 85 L95 85 L105 135 L65 135 Z" fill="#1F1F2B" stroke="#E10600" stroke-width="3"/>
+                  <rect x="48" y="75" width="55" height="12" rx="4" fill="#E10600"/>
+                  <!-- Engine Cover & Shark Fin -->
+                  <path d="M95 110 Q160 65 240 85 L310 95 L310 155 L110 155 Z" fill="#E10600"/>
+                  <path d="M130 115 L230 98 L250 135 L125 140 Z" fill="#15151E"/>
+                  <!-- Halo & Cockpit -->
+                  <path d="M275 95 Q315 72 355 98" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>
+                  <circle cx="310" cy="92" r="11" fill="#FFD700" stroke="#15151E" stroke-width="2"/> <!-- Driver Helmet -->
+                  <!-- Nose Cone -->
+                  <path d="M310 102 L515 138 L525 152 L310 155 Z" fill="#E10600"/>
+                  <path d="M360 112 L470 132 L465 144 L355 135 Z" fill="#FFFFFF"/>
+                  <!-- Front Wing -->
+                  <path d="M495 142 L565 148 L560 162 L485 160 Z" fill="#1F1F2B" stroke="#FFFFFF" stroke-width="2"/>
+                  <!-- Floor & Sidepod Detail -->
+                  <rect x="145" y="152" width="240" height="8" rx="3" fill="#0B0B10"/>
+                  <!-- Rear Wheel -->
+                  <g transform="translate(135, 145)">
+                    <circle cx="0" cy="0" r="38" fill="#18181B" stroke="#3F3F46" stroke-width="4"/>
+                    <circle cx="0" cy="0" r="24" fill="#27272A" stroke="#E10600" stroke-width="3" stroke-dasharray="18 8"/>
+                    <circle cx="0" cy="0" r="8" fill="#FFFFFF"/>
+                  </g>
+                  <!-- Front Wheel -->
+                  <g transform="translate(445, 148)">
+                    <circle cx="0" cy="0" r="35" fill="#18181B" stroke="#3F3F46" stroke-width="4"/>
+                    <circle cx="0" cy="0" r="21" fill="#27272A" stroke="#E10600" stroke-width="3" stroke-dasharray="16 8"/>
+                    <circle cx="0" cy="0" r="7" fill="#FFFFFF"/>
+                  </g>
+                  <!-- Speed Wind Streaks -->
+                  <line x1="20" y1="60" x2="120" y2="60" stroke="#FFFFFF" stroke-width="2" stroke-opacity="0.4" stroke-linecap="round"/>
+                  <line x1="420" y1="105" x2="560" y2="105" stroke="#E10600" stroke-width="2" stroke-opacity="0.7" stroke-linecap="round"/>
+                </svg>
+              </div>
+
+              <!-- Quick Navigation Cards inside Hero -->
+              <div class="grid grid-cols-2 gap-3 mt-2">
+                <button onclick="navigateTo('car')" class="bg-f1dark/80 hover:bg-f1red/20 border border-f1border hover:border-f1red p-3.5 rounded-2xl text-left transition group">
+                  <div class="text-f1red text-sm font-bold flex items-center justify-between">
+                    <span>F1 머신 해부</span>
+                    <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                  </div>
+                  <p class="text-xs text-gray-400 mt-1">부품 클릭하고 비밀 보기</p>
+                </button>
+                <button onclick="navigateTo('broadcast')" class="bg-f1dark/80 hover:bg-f1red/20 border border-f1border hover:border-f1red p-3.5 rounded-2xl text-left transition group">
+                  <div class="text-f1red text-sm font-bold flex items-center justify-between">
+                    <span>중계 화면 읽기</span>
+                    <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                  </div>
+                  <p class="text-xs text-gray-400 mt-1">GAP, PIT, SC 뜻 알아보기</p>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Learning Roadmap Grid -->
+        <div class="mt-16">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h2 class="text-xl sm:text-2xl font-bold">한눈에 보는 F1 입문 코스</h2>
+              <p class="text-sm text-gray-400">원하는 주제부터 자유롭게 눌러서 탐색해보세요!</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div onclick="navigateTo('intro')" class="cursor-pointer bg-f1card hover:bg-f1card/80 border border-f1border hover:border-f1red rounded-2xl p-5 transition-all group">
+              <div class="w-10 h-10 rounded-xl bg-f1red/15 text-f1red flex items-center justify-center font-racing font-bold mb-4 group-hover:bg-f1red group-hover:text-white transition">A</div>
+              <h3 class="font-bold text-lg mb-1">F1은 어떤 스포츠?</h3>
+              <p class="text-xs text-gray-400 leading-relaxed">일반 레이싱과 다른 점, 한 시즌의 진행 방식을 Q&A로 쉽게 풀었어요.</p>
+            </div>
+
+            <div onclick="navigateTo('teams')" class="cursor-pointer bg-f1card hover:bg-f1card/80 border border-f1border hover:border-f1red rounded-2xl p-5 transition-all group">
+              <div class="w-10 h-10 rounded-xl bg-f1red/15 text-f1red flex items-center justify-center font-racing font-bold mb-4 group-hover:bg-f1red group-hover:text-white transition">B</div>
+              <h3 class="font-bold text-lg mb-1">2026 팀 & 드라이버</h3>
+              <p class="text-xs text-gray-400 leading-relaxed">캐딜락·아우디가 합류한 11개 팀과 22명의 스타 드라이버를 만나보세요.</p>
+            </div>
+
+            <div onclick="navigateTo('car')" class="cursor-pointer bg-f1card hover:bg-f1card/80 border border-f1border hover:border-f1red rounded-2xl p-5 transition-all group">
+              <div class="w-10 h-10 rounded-xl bg-f1red/15 text-f1red flex items-center justify-center font-racing font-bold mb-4 group-hover:bg-f1red group-hover:text-white transition">C</div>
+              <h3 class="font-bold text-lg mb-1">F1 자동차 알아보기</h3>
+              <p class="text-xs text-gray-400 leading-relaxed">날개, 타이어, 2026 액티브 에어로까지! 부품을 클릭해 비밀을 확인하세요.</p>
+            </div>
+
+            <div onclick="navigateTo('weekend')" class="cursor-pointer bg-f1card hover:bg-f1card/80 border border-f1border hover:border-f1red rounded-2xl p-5 transition-all group">
+              <div class="w-10 h-10 rounded-xl bg-f1red/15 text-f1red flex items-center justify-center font-racing font-bold mb-4 group-hover:bg-f1red group-hover:text-white transition">D</div>
+              <h3 class="font-bold text-lg mb-1">경기 진행 방식</h3>
+              <p class="text-xs text-gray-400 leading-relaxed">금·토·일 3일간의 레이스 주말! 연습주행부터 포디엄 샴페인까지.</p>
+            </div>
+
+            <div onclick="navigateTo('play')" class="cursor-pointer bg-f1card hover:bg-f1card/80 border border-f1border hover:border-f1red rounded-2xl p-5 transition-all group sm:col-span-2">
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-10 h-10 rounded-xl bg-f1red text-white flex items-center justify-center font-racing font-bold">E</div>
+                <span class="text-xs bg-f1red/20 text-f1red px-2.5 py-1 rounded-full font-bold">4가지 인터랙티브 게임</span>
+              </div>
+              <h3 class="font-bold text-lg mb-1">직접 체험하기 (속도 · 피트스톱 · 응원팀 · 순서)</h3>
+              <p class="text-xs text-gray-400 leading-relaxed">시속 350km 체감, 1.8초 타이어 교체 도전, 나만의 응원팀 카드 생성까지 직접 해보세요!</p>
+            </div>
+
+            <div onclick="navigateTo('broadcast')" class="cursor-pointer bg-f1card hover:bg-f1card/80 border border-f1border hover:border-f1red rounded-2xl p-5 transition-all group">
+              <div class="w-10 h-10 rounded-xl bg-f1red/15 text-f1red flex items-center justify-center font-racing font-bold mb-4 group-hover:bg-f1red group-hover:text-white transition">F</div>
+              <h3 class="font-bold text-lg mb-1">F1 중계 화면 읽기</h3>
+              <p class="text-xs text-gray-400 leading-relaxed">TV 중계 왼쪽의 순위표! GAP, PIT, SC, 타이어 색상을 클릭해 배워보세요.</p>
+            </div>
+
+            <div onclick="navigateTo('quiz')" class="cursor-pointer bg-f1card hover:bg-f1card/80 border border-f1border hover:border-f1red rounded-2xl p-5 transition-all group">
+              <div class="w-10 h-10 rounded-xl bg-f1red/15 text-f1red flex items-center justify-center font-racing font-bold mb-4 group-hover:bg-f1red group-hover:text-white transition">G</div>
+              <h3 class="font-bold text-lg mb-1">F1 입문자 퀴즈</h3>
+              <p class="text-xs text-gray-400 leading-relaxed">10문제로 나의 F1 팬 레벨을 테스트하고 입문 수료증을 받아보세요!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION A: F1은 어떤 스포츠일까? ==================== -->
+    <section id="view-intro" class="view-section hidden max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div class="mb-8">
+        <span class="text-f1red font-racing text-xs font-bold tracking-widest uppercase">CHAPTER A</span>
+        <h2 class="text-3xl sm:text-4xl font-black mt-1">F1은 어떤 스포츠일까?</h2>
+        <p class="text-gray-400 mt-2">질문 카드를 눌러 30초 만에 F1의 핵심 매력을 알아보세요.</p>
+      </div>
+
+      <!-- Visual Comparison Banner -->
+      <div class="bg-f1card border border-f1border rounded-2xl p-6 mb-8 grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+        <div class="text-center p-4 bg-f1dark rounded-xl border border-f1border/60">
+          <div class="text-3xl mb-2">🏎️</div>
+          <div class="font-bold text-white">오직 속도를 위한 맞춤형 머신</div>
+          <p class="text-xs text-gray-400 mt-1">시중에 파는 차를 개조하는 게 아니라, 오직 F1 경주만을 위해 0부터 새로 설계한 우주선 같은 차입니다.</p>
+        </div>
+        <div class="text-center p-4 bg-f1dark rounded-xl border border-f1border/60">
+          <div class="text-3xl mb-2">🌍</div>
+          <div class="font-bold text-white">전 세계를 도는 월드 투어</div>
+          <p class="text-xs text-gray-400 mt-1">3월부터 12월까지 호주, 일본, 모나코, 영국, 미국 등 전 세계 20여 개국을 돌며 '그랑프리(GP)'를 엽니다.</p>
+        </div>
+        <div class="text-center p-4 bg-f1dark rounded-xl border border-f1border/60">
+          <div class="text-3xl mb-2">🤝</div>
+          <div class="font-bold text-white">드라이버 + 1,000명의 팀워크</div>
+          <p class="text-xs text-gray-400 mt-1">운전은 1명이 하지만, 차를 만드는 엔지니어와 2초 만에 타이어를 가는 미캐닉까지 수백 명이 함께 싸웁니다.</p>
+        </div>
+      </div>
+
+      <!-- Interactive Q&A Accordion -->
+      <div class="space-y-4" id="faq-container">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Next Section CTA -->
+      <div class="mt-10 flex justify-between items-center bg-f1card border border-f1border p-5 rounded-2xl">
+        <div>
+          <span class="text-xs text-gray-400">다음 단계</span>
+          <div class="font-bold text-white">2026 시즌을 빛내는 11개 팀과 드라이버 만나기</div>
+        </div>
+        <button onclick="navigateTo('teams')" class="bg-f1red hover:bg-red-700 text-white font-bold px-5 py-3 rounded-xl transition flex items-center space-x-2">
+          <span>B. 팀 & 드라이버</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION B: F1 팀과 드라이버 (2026 시즌) ==================== -->
+    <section id="view-teams" class="view-section hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+        <div>
+          <span class="text-f1red font-racing text-xs font-bold tracking-widest uppercase">CHAPTER B · 2026 OFFICIAL LINEUP</span>
+          <h2 class="text-3xl sm:text-4xl font-black mt-1">2026 F1 팀과 드라이버</h2>
+          <p class="text-gray-400 mt-2">2026년에는 <strong class="text-white">아우디(Audi)</strong>와 <strong class="text-white">캐딜락(Cadillac)</strong>이 합류해 총 11개 팀, 22명의 드라이버가 경쟁합니다! 카드를 클릭해 상세 정보를 확인하세요.</p>
+        </div>
+        <div class="flex items-center space-x-2 text-xs bg-f1card border border-f1border px-3 py-2 rounded-xl">
+          <i class="fa-solid fa-circle-info text-f1red"></i>
+          <span class="text-gray-300">2026 공식 엔트리 기준</span>
+        </div>
+      </div>
+
+      <!-- Famous Rivalries Highlight Banner -->
+      <div class="mb-8 bg-gradient-to-r from-f1card via-f1dark to-f1card border border-f1border rounded-2xl p-5">
+        <div class="flex items-center space-x-2 mb-3">
+          <span class="bg-f1red text-white text-xs font-bold px-2.5 py-0.5 rounded">관전 포인트</span>
+          <h3 class="font-bold text-base sm:text-lg">2026 시즌 놓치면 안 될 라이벌 & 스토리</h3>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+            <div class="font-bold text-red-400 mb-1">🔥 같은 팀 안의 두 에이스: 페라리</div>
+            <p class="text-xs text-gray-300 leading-relaxed">페라리의 왕자 <strong>샤를 르클레르</strong>와 7회 월드 챔피언 <strong>루이스 해밀턴</strong>이 같은 붉은 차를 타고 펼치는 자존심 대결!</p>
+          </div>
+          <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+            <div class="font-bold text-teal-400 mb-1">⚡ 세대교체 돌풍: 메르세데스 vs 레드불</div>
+            <p class="text-xs text-gray-300 leading-relaxed">메르세데스의 신성 <strong>키미 안토넬리</strong> & <strong>조지 러셀</strong> 콤비와, 4회 챔피언 <strong>막스 베르스타펜</strong>의 치열한 선두 다툼!</p>
+          </div>
+          <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+            <div class="font-bold text-amber-400 mb-1">🆕 새로운 제조사 전쟁: 아우디 & 캐딜락</div>
+            <p class="text-xs text-gray-300 leading-relaxed">독일 명가 <strong>아우디</strong>와 미국 자존심 <strong>캐딜락</strong>의 F1 데뷔! 베테랑 보타스·페레즈가 이끄는 캐딜락의 도전.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 11 Teams Grid -->
+      <div id="teams-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Next Section CTA -->
+      <div class="mt-10 flex justify-between items-center bg-f1card border border-f1border p-5 rounded-2xl">
+        <div>
+          <span class="text-xs text-gray-400">다음 단계</span>
+          <div class="font-bold text-white">시속 350km를 견디는 F1 자동차의 비밀 해부하기</div>
+        </div>
+        <button onclick="navigateTo('car')" class="bg-f1red hover:bg-red-700 text-white font-bold px-5 py-3 rounded-xl transition flex items-center space-x-2">
+          <span>C. F1 머신</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION C: F1 자동차 알아보기 ==================== -->
+    <section id="view-car" class="view-section hidden max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div class="mb-8">
+        <span class="text-f1red font-racing text-xs font-bold tracking-widest uppercase">CHAPTER C · 2026 TECHNICAL SPECS</span>
+        <h2 class="text-3xl sm:text-4xl font-black mt-1">F1 자동차 알아보기</h2>
+        <p class="text-gray-400 mt-2">자동차 위의 <span class="text-f1red font-bold">빨간 포인트(●)</span>를 클릭하거나 터치해보세요! 일반 자동차와 무엇이 다른지 쉽게 알려드릴게요.</p>
+      </div>
+
+      <!-- Interactive Car Anatomy Board -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- Interactive Car Diagram (7 Cols) -->
+        <div class="lg:col-span-7 bg-f1card border border-f1border rounded-3xl p-5 sm:p-8 relative overflow-hidden">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-racing text-gray-400">INTERACTIVE BLUEPRINT · 2026 F1 CAR</span>
+            <span class="text-xs bg-f1red/20 text-f1red px-2.5 py-0.5 rounded-full font-bold">부품을 클릭하세요</span>
+          </div>
+
+          <div class="relative w-full aspect-[16/9] flex items-center justify-center my-4 select-none">
+            <!-- Detailed Top-Side SVG Car Blueprint -->
+            <svg viewBox="0 0 700 320" class="w-full h-full">
+              <!-- Grid Lines Background -->
+              <defs>
+                <pattern id="grid" width="35" height="35" patternUnits="userSpaceOnUse">
+                  <path d="M 35 0 L 0 0 0 35" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+                </pattern>
+              </defs>
+              <rect width="700" height="320" fill="url(#grid)" rx="16"/>
+
+              <!-- Airflow Curves (Downforce visualization) -->
+              <path d="M 650 90 Q 450 85 320 125 T 70 75" fill="none" stroke="#38BDF8" stroke-width="2" stroke-dasharray="6 6" opacity="0.5"/>
+              <path d="M 650 130 Q 480 135 340 165 T 60 110" fill="none" stroke="#38BDF8" stroke-width="2" stroke-dasharray="6 6" opacity="0.5"/>
+
+              <!-- Rear Wing (Active Aero X/Z Mode) -->
+              <path d="M 65 95 L 115 95 L 128 175 L 78 175 Z" fill="#27273A" stroke="#FFFFFF" stroke-width="2"/>
+              <rect x="55" y="80" width="68" height="16" rx="5" fill="#E10600"/>
+
+              <!-- Engine Cover & 50:50 Hybrid Power Unit -->
+              <path d="M 115 135 Q 200 75 300 105 L 385 120 L 385 205 L 135 205 Z" fill="#1F1F2E" stroke="#E10600" stroke-width="3"/>
+              <!-- Hybrid Core Glow -->
+              <rect x="190" y="135" width="95" height="45" rx="10" fill="rgba(225,6,0,0.25)" stroke="#E10600" stroke-width="2" stroke-dasharray="4 3"/>
+              <text x="237" y="162" fill="#FFFFFF" font-size="11" font-weight="bold" text-anchor="middle" font-family="Orbitron">50:50 PU</text>
+
+              <!-- Halo Safety Device -->
+              <path d="M 340 120 Q 390 88 440 125" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round"/>
+              <circle cx="382" cy="116" r="14" fill="#FACC15" stroke="#15151E" stroke-width="2"/>
+
+              <!-- Nose & Chassis -->
+              <path d="M 385 130 L 615 178 L 625 198 L 385 205 Z" fill="#E10600"/>
+
+              <!-- Front Wing -->
+              <path d="M 590 185 L 665 194 L 660 212 L 580 208 Z" fill="#27273A" stroke="#FFFFFF" stroke-width="2"/>
+
+              <!-- Floor -->
+              <rect x="175" y="202" width="290" height="10" rx="4" fill="#09090D" stroke="#52525B" stroke-width="1"/>
+
+              <!-- Rear Tire -->
+              <g transform="translate(165, 195)">
+                <circle cx="0" cy="0" r="48" fill="#121217" stroke="#52525B" stroke-width="5"/>
+                <circle cx="0" cy="0" r="30" fill="#1E1E26" stroke="#E10600" stroke-width="4"/>
+                <circle cx="0" cy="0" r="10" fill="#FFFFFF"/>
+              </g>
+
+              <!-- Front Tire -->
+              <g transform="translate(530, 198)">
+                <circle cx="0" cy="0" r="44" fill="#121217" stroke="#52525B" stroke-width="5"/>
+                <circle cx="0" cy="0" r="27" fill="#1E1E26" stroke="#E10600" stroke-width="4"/>
+                <circle cx="0" cy="0" r="9" fill="#FFFFFF"/>
+              </g>
+            </svg>
+
+            <!-- Interactive Hotspots (Positioned via % for responsiveness) -->
+            <button onclick="selectCarPart('frontWing')" data-part="frontWing" style="top: 58%; left: 86%;" class="car-hotspot hotspot-pulse absolute -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-f1red text-white font-bold text-xs flex items-center justify-center shadow-lg border-2 border-white hover:scale-110 transition">1</button>
+            <button onclick="selectCarPart('halo')" data-part="halo" style="top: 32%; left: 55%;" class="car-hotspot hotspot-pulse absolute -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-f1red text-white font-bold text-xs flex items-center justify-center shadow-lg border-2 border-white hover:scale-110 transition">2</button>
+            <button onclick="selectCarPart('powerUnit')" data-part="powerUnit" style="top: 48%; left: 34%;" class="car-hotspot hotspot-pulse absolute -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-f1red text-white font-bold text-xs flex items-center justify-center shadow-lg border-2 border-white hover:scale-110 transition">3</button>
+            <button onclick="selectCarPart('rearWing')" data-part="rearWing" style="top: 26%; left: 13%;" class="car-hotspot hotspot-pulse absolute -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-f1red text-white font-bold text-xs flex items-center justify-center shadow-lg border-2 border-white hover:scale-110 transition">4</button>
+            <button onclick="selectCarPart('tires')" data-part="tires" style="top: 62%; left: 75%;" class="car-hotspot hotspot-pulse absolute -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-f1red text-white font-bold text-xs flex items-center justify-center shadow-lg border-2 border-white hover:scale-110 transition">5</button>
+          </div>
+
+          <!-- Part Selector Pills -->
+          <div class="flex flex-wrap gap-2 justify-center mt-2">
+            <button onclick="selectCarPart('frontWing')" class="part-pill px-3 py-1.5 rounded-lg text-xs font-bold bg-f1dark border border-f1border hover:border-f1red transition" data-part="frontWing">1. 프론트 윙</button>
+            <button onclick="selectCarPart('halo')" class="part-pill px-3 py-1.5 rounded-lg text-xs font-bold bg-f1dark border border-f1border hover:border-f1red transition" data-part="halo">2. 헤일로 (안전장치)</button>
+            <button onclick="selectCarPart('powerUnit')" class="part-pill px-3 py-1.5 rounded-lg text-xs font-bold bg-f1dark border border-f1border hover:border-f1red transition" data-part="powerUnit">3. 2026 하이브리드 엔진</button>
+            <button onclick="selectCarPart('rearWing')" class="part-pill px-3 py-1.5 rounded-lg text-xs font-bold bg-f1dark border border-f1border hover:border-f1red transition" data-part="rearWing">4. 액티브 에어로 리어 윙</button>
+            <button onclick="selectCarPart('tires')" class="part-pill px-3 py-1.5 rounded-lg text-xs font-bold bg-f1dark border border-f1border hover:border-f1red transition" data-part="tires">5. 슬릭 타이어</button>
+          </div>
+        </div>
+
+        <!-- Selected Part Detail Panel (5 Cols) -->
+        <div class="lg:col-span-5 bg-f1card border border-f1border rounded-3xl p-6 sm:p-7" id="car-part-detail">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Tire Compounds & Speed Comparison Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+        <!-- Tire Guide -->
+        <div class="bg-f1card border border-f1border rounded-2xl p-6">
+          <h3 class="font-bold text-lg mb-1 flex items-center space-x-2">
+            <i class="fa-solid fa-circle-dot text-f1red"></i>
+            <span>타이어 색깔만 알면 전략이 보인다!</span>
+          </h3>
+          <p class="text-xs text-gray-400 mb-4">F1 타이어에는 홈이 없는 매끈한 타이어(슬릭) 3종과 빗길용 2종이 있습니다.</p>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between bg-f1dark p-3 rounded-xl border-l-4 border-red-500">
+              <div>
+                <span class="font-bold text-red-400 text-sm">SOFT (소프트 · 빨강)</span>
+                <p class="text-xs text-gray-400">가장 빠르지만 금방 닳아요! (예선 및 단거리 승부용)</p>
+              </div>
+              <span class="text-xs font-racing bg-red-500/20 text-red-400 px-2 py-1 rounded">속도 ★★★</span>
+            </div>
+            <div class="flex items-center justify-between bg-f1dark p-3 rounded-xl border-l-4 border-yellow-400">
+              <div>
+                <span class="font-bold text-yellow-400 text-sm">MEDIUM (미디엄 · 노랑)</span>
+                <p class="text-xs text-gray-400">속도와 수명의 황금 밸런스! 가장 무난한 선택</p>
+              </div>
+              <span class="text-xs font-racing bg-yellow-400/20 text-yellow-300 px-2 py-1 rounded">균형 ★★★</span>
+            </div>
+            <div class="flex items-center justify-between bg-f1dark p-3 rounded-xl border-l-4 border-white">
+              <div>
+                <span class="font-bold text-white text-sm">HARD (하드 · 하양)</span>
+                <p class="text-xs text-gray-400">조금 느리지만 아주 오래 버텨요! (장거리 주행용)</p>
+              </div>
+              <span class="text-xs font-racing bg-white/10 text-white px-2 py-1 rounded">수명 ★★★</span>
+            </div>
+            <div class="flex items-center justify-between bg-f1dark p-3 rounded-xl border-l-4 border-emerald-400">
+              <div>
+                <span class="font-bold text-emerald-400 text-sm">INTER (초록) / WET (파랑)</span>
+                <p class="text-xs text-gray-400">비가 올 때 물을 배수하며 달리는 빗길 전용 타이어</p>
+              </div>
+              <span class="text-xs font-racing bg-emerald-400/20 text-emerald-300 px-2 py-1 rounded">빗길 전용</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Road Car vs F1 Car Numbers -->
+        <div class="bg-f1card border border-f1border rounded-2xl p-6 flex flex-col justify-between">
+          <div>
+            <h3 class="font-bold text-lg mb-1 flex items-center space-x-2">
+              <i class="fa-solid fa-gauge-high text-f1red"></i>
+              <span>일반 자동차 vs 2026 F1 머신</span>
+            </h3>
+            <p class="text-xs text-gray-400 mb-4">F1 자동차는 왜 이렇게 빠를까요? 핵심은 <strong>가벼운 무게</strong>와 <strong>다운포스(공기 누름 힘)</strong>입니다.</p>
+
+            <div class="space-y-4">
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-gray-400">정지 → 시속 100km 가속 (제로백)</span>
+                  <span class="font-bold text-f1red">약 2.6초 <span class="text-gray-500 font-normal">(일반차 약 8~9초)</span></span>
+                </div>
+                <div class="w-full h-2.5 bg-f1dark rounded-full overflow-hidden">
+                  <div class="bg-f1red h-full rounded-full" style="width: 92%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-gray-400">최고 속도</span>
+                  <span class="font-bold text-white">약 350km/h+ <span class="text-gray-500 font-normal">(KTX보다 빠름!)</span></span>
+                </div>
+                <div class="w-full h-2.5 bg-f1dark rounded-full overflow-hidden">
+                  <div class="bg-white h-full rounded-full" style="width: 96%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-gray-400">2026 규정 최소 중량 (드라이버 포함)</span>
+                  <span class="font-bold text-emerald-400">768kg <span class="text-gray-500 font-normal">(기존보다 30kg 더 가벼워짐!)</span></span>
+                </div>
+                <div class="w-full h-2.5 bg-f1dark rounded-full overflow-hidden">
+                  <div class="bg-emerald-400 h-full rounded-full" style="width: 45%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-5 p-3.5 bg-f1red/10 border border-f1red/30 rounded-xl text-xs text-gray-200 leading-relaxed">
+            💡 <strong>재미있는 사실:</strong> F1 자동차가 시속 250km 이상으로 달릴 때 발생하는 공기의 누르는 힘(다운포스)이 너무 강해서, 이론상 <strong>터널 천장에 거꾸로 매달려서도 달릴 수 있습니다!</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Next Section CTA -->
+      <div class="mt-10 flex justify-between items-center bg-f1card border border-f1border p-5 rounded-2xl">
+        <div>
+          <span class="text-xs text-gray-400">다음 단계</span>
+          <div class="font-bold text-white">금·토·일 3일간 펼쳐지는 그랑프리 주말 일정</div>
+        </div>
+        <button onclick="navigateTo('weekend')" class="bg-f1red hover:bg-red-700 text-white font-bold px-5 py-3 rounded-xl transition flex items-center space-x-2">
+          <span>D. 경기 방식</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION D: F1 경기 진행 방식 ==================== -->
+    <section id="view-weekend" class="view-section hidden max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div class="mb-8">
+        <span class="text-f1red font-racing text-xs font-bold tracking-widest uppercase">CHAPTER D · RACE WEEKEND</span>
+        <h2 class="text-3xl sm:text-4xl font-black mt-1">F1 경기 진행 방식</h2>
+        <p class="text-gray-400 mt-2">F1은 단 하루만 경주하지 않아요! 금요일부터 일요일까지 3일 동안 축제가 열립니다.</p>
+      </div>
+
+      <!-- Weekend Format Switcher -->
+      <div class="flex space-x-2 bg-f1card p-1.5 rounded-xl border border-f1border w-fit mb-8">
+        <button id="btn-format-standard" onclick="switchWeekendFormat('standard')" class="px-4 py-2 rounded-lg text-sm font-bold bg-f1red text-white transition">일반 그랑프리 주말 (기본)</button>
+        <button id="btn-format-sprint" onclick="switchWeekendFormat('sprint')" class="px-4 py-2 rounded-lg text-sm font-bold text-gray-300 hover:text-white transition">⚡ 스프린트 주말 (특별 일정)</button>
+      </div>
+
+      <!-- Timeline Container -->
+      <div id="weekend-timeline" class="space-y-4">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Points System Summary -->
+      <div class="mt-8 bg-f1card border border-f1border rounded-2xl p-6">
+        <h3 class="font-bold text-lg mb-2">🏆 점수는 어떻게 받나요? (일요일 결승 기준)</h3>
+        <p class="text-xs text-gray-400 mb-4">22명 중 상위 10명까지만 챔피언십 포인트를 획득합니다. 시즌 종료 후 총점이 가장 높은 드라이버와 팀이 챔피언이 됩니다!</p>
+        <div class="grid grid-cols-5 sm:grid-cols-10 gap-2 text-center">
+          <div class="bg-f1red/20 border border-f1red rounded-xl p-2"><div class="text-[10px] text-gray-300">1위</div><div class="font-racing font-black text-white">25</div></div>
+          <div class="bg-f1dark border border-f1border rounded-xl p-2"><div class="text-[10px] text-gray-400">2위</div><div class="font-racing font-bold text-white">18</div></div>
+          <div class="bg-f1dark border border-f1border rounded-xl p-2"><div class="text-[10px] text-gray-400">3위</div><div class="font-racing font-bold text-white">15</div></div>
+          <div class="bg-f1dark border border-f1border rounded-xl p-2"><div class="text-[10px] text-gray-400">4위</div><div class="font-racing font-bold text-gray-200">12</div></div>
+          <div class="bg-f1dark border border-f1border rounded-xl p-2"><div class="text-[10px] text-gray-400">5위</div><div class="font-racing font-bold text-gray-200">10</div></div>
+          <div class="bg-f1dark border border-f1border rounded-xl p-2"><div class="text-[10px] text-gray-400">6위</div><div class="font-racing font-bold text-gray-300">8</div></div>
+          <div class="bg-f1dark border border-f1border rounded-xl p-2"><div class="text-[10px] text-gray-400">7위</div><div class="font-racing font-bold text-gray-300">6</div></div>
+          <div class="bg-f1dark border border-f1border rounded-xl p-2"><div class="text-[10px] text-gray-400">8위</div><div class="font-racing font-bold text-gray-300">4</div></div>
+          <div class="bg-f1dark border border-f1border rounded-xl p-2"><div class="text-[10px] text-gray-400">9위</div><div class="font-racing font-bold text-gray-300">2</div></div>
+          <div class="bg-f1dark border border-f1border rounded-xl p-2"><div class="text-[10px] text-gray-400">10위</div><div class="font-racing font-bold text-gray-300">1</div></div>
+        </div>
+      </div>
+
+      <!-- Next Section CTA -->
+      <div class="mt-10 flex justify-between items-center bg-f1card border border-f1border p-5 rounded-2xl">
+        <div>
+          <span class="text-xs text-gray-400">다음 단계</span>
+          <div class="font-bold text-white">4가지 미니게임으로 F1 직접 체험하기!</div>
+        </div>
+        <button onclick="navigateTo('play')" class="bg-f1red hover:bg-red-700 text-white font-bold px-5 py-3 rounded-xl transition flex items-center space-x-2">
+          <span>E. 직접 체험</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION E: 직접 체험하기 (4대 미니게임) ==================== -->
+    <section id="view-play" class="view-section hidden max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div class="mb-6">
+        <span class="text-f1red font-racing text-xs font-bold tracking-widest uppercase">CHAPTER E · INTERACTIVE ZONE</span>
+        <h2 class="text-3xl sm:text-4xl font-black mt-1">직접 체험하기</h2>
+        <p class="text-gray-400 mt-2">눈으로만 보지 말고 직접 조작해보세요! (※ 재미를 위한 가상 시뮬레이션 체험입니다)</p>
+      </div>
+
+      <!-- 4 Mini-Game Tabs -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+        <button onclick="switchGameTab('speed')" data-gametab="speed" class="game-tab-btn bg-f1red text-white border border-f1red p-4 rounded-2xl text-left transition shadow-lg">
+          <div class="text-xs font-racing opacity-80">GAME 01</div>
+          <div class="font-bold text-base mt-0.5">🚀 F1 속도 체험</div>
+        </button>
+        <button onclick="switchGameTab('pitstop')" data-gametab="pitstop" class="game-tab-btn bg-f1card text-gray-300 border border-f1border hover:border-f1red p-4 rounded-2xl text-left transition">
+          <div class="text-xs font-racing opacity-80">GAME 02</div>
+          <div class="font-bold text-base mt-0.5">🔧 피트스톱 챌린지</div>
+        </button>
+        <button onclick="switchGameTab('teamfinder')" data-gametab="teamfinder" class="game-tab-btn bg-f1card text-gray-300 border border-f1border hover:border-f1red p-4 rounded-2xl text-left transition">
+          <div class="text-xs font-racing opacity-80">GAME 03</div>
+          <div class="font-bold text-base mt-0.5">❤️ 나의 F1 팀 찾기</div>
+        </button>
+        <button onclick="switchGameTab('order')" data-gametab="order" class="game-tab-btn bg-f1card text-gray-300 border border-f1border hover:border-f1red p-4 rounded-2xl text-left transition">
+          <div class="text-xs font-racing opacity-80">GAME 04</div>
+          <div class="font-bold text-base mt-0.5">📅 레이스 순서 맞추기</div>
+        </button>
+      </div>
+
+      <!-- MINI-GAME 1: F1 속도 체험 -->
+      <div id="game-panel-speed" class="game-panel bg-f1card border border-f1border rounded-3xl p-6 sm:p-8">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+          <div>
+            <h3 class="text-xl sm:text-2xl font-bold">🚀 F1 속도 체험 시뮬레이터</h3>
+            <p class="text-sm text-gray-400">슬라이더를 움직여 시속 0km에서 350km까지 속도를 올려보세요! 일반 승용차와 얼마나 차이 날까요?</p>
+          </div>
+          <span class="text-xs bg-white/10 text-gray-300 px-3 py-1.5 rounded-full w-fit">가상 시각 체험</span>
+        </div>
+
+        <!-- Visual Tunnel / Track Canvas -->
+        <div class="relative rounded-2xl overflow-hidden border border-f1border bg-f1dark h-64 sm:h-72 mb-6">
+          <canvas id="speed-canvas" class="w-full h-full block"></canvas>
+          <!-- HUD Overlay -->
+          <div class="absolute top-4 left-4 bg-black/70 backdrop-blur-md border border-white/15 px-4 py-2 rounded-xl">
+            <div class="text-[10px] text-gray-400 font-racing">CURRENT SPEED</div>
+            <div class="font-racing text-3xl sm:text-4xl font-black text-white"><span id="speed-display">100</span> <span class="text-sm text-f1red">km/h</span></div>
+          </div>
+          <div id="speed-mode-badge" class="absolute top-4 right-4 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-xl text-xs font-bold text-gray-200">
+            일반 도로 주행 속도
+          </div>
+          <div class="absolute bottom-4 left-4 right-4 flex justify-between items-center bg-black/70 backdrop-blur-md px-4 py-2.5 rounded-xl text-xs">
+            <span id="speed-comparison-text" class="text-gray-200 font-medium">고속도로에서 달리는 일반 승용차의 평균 속도입니다.</span>
+            <span id="speed-gforce" class="font-racing text-f1red font-bold">1.0 G</span>
+          </div>
+        </div>
+
+        <!-- Slider & Preset Buttons -->
+        <div class="space-y-4">
+          <input id="speed-slider" type="range" min="0" max="350" value="100" oninput="updateSpeedSim(this.value)" class="w-full h-3 bg-f1dark rounded-lg appearance-none cursor-pointer accent-f1red">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <button onclick="setSpeedPreset(60)" class="bg-f1dark hover:bg-white/10 border border-f1border py-2.5 px-3 rounded-xl text-xs font-bold transition">🚗 시내 주행 (60km/h)</button>
+            <button onclick="setSpeedPreset(110)" class="bg-f1dark hover:bg-white/10 border border-f1border py-2.5 px-3 rounded-xl text-xs font-bold transition">🛣️ 고속도로 (110km/h)</button>
+            <button onclick="setSpeedPreset(290)" class="bg-f1dark hover:bg-white/10 border border-f1border py-2.5 px-3 rounded-xl text-xs font-bold transition">⚡ F1 코너 탈출 (290km/h)</button>
+            <button onclick="setSpeedPreset(350)" class="bg-f1red/20 hover:bg-f1red/30 border border-f1red text-red-300 py-2.5 px-3 rounded-xl text-xs font-bold transition">🔥 F1 X-모드 최고속 (350km/h)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MINI-GAME 2: 피트스톱 챌린지 -->
+      <div id="game-panel-pitstop" class="game-panel hidden bg-f1card border border-f1border rounded-3xl p-6 sm:p-8">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+          <div>
+            <h3 class="text-xl sm:text-2xl font-bold">🔧 피트스톱 챌린지 (타이어 교체)</h3>
+            <p class="text-sm text-gray-400">실제 F1 미캐닉들은 4개의 타이어를 <strong class="text-white">약 1.8~2.2초</strong> 만에 교체합니다! 4개 바퀴를 순서 상관없이 최대한 빠르게 터치하세요!</p>
+          </div>
+          <div class="flex items-center space-x-3">
+            <div class="bg-f1dark border border-f1border px-4 py-2 rounded-xl text-center">
+              <div class="text-[10px] text-gray-400">내 최고 기록</div>
+              <div id="pit-best-record" class="font-racing font-bold text-yellow-400 text-base">--.--s</div>
+            </div>
+            <div class="bg-f1dark border border-f1border px-4 py-2 rounded-xl text-center">
+              <div class="text-[10px] text-gray-400">현재 타이머</div>
+              <div id="pit-current-timer" class="font-racing font-black text-f1red text-xl">0.00s</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pit Box Visual Area -->
+        <div class="bg-f1dark border border-f1border rounded-2xl p-6 relative flex flex-col items-center justify-center min-h-[320px]">
+          <div id="pit-status-banner" class="mb-6 text-center">
+            <span class="bg-white/10 text-white px-4 py-1.5 rounded-full text-sm font-bold">아래 '피트인 시작' 버튼을 누르고 4개 타이어를 클릭하세요!</span>
+          </div>
+
+          <!-- Top-Down Car & 4 Tire Buttons -->
+          <div class="relative w-64 sm:w-80 h-44 flex items-center justify-center my-2">
+            <!-- Car Body Top View -->
+            <div class="w-48 sm:w-60 h-20 bg-gradient-to-r from-f1red via-red-600 to-f1red rounded-full border-2 border-white/30 flex items-center justify-center shadow-xl">
+              <span class="font-racing font-black text-white/90 text-xs tracking-widest">F1 PIT BOX</span>
+            </div>
+
+            <!-- 4 Interactive Tires -->
+            <button id="tire-fl" onclick="changeTire('fl')" disabled class="pit-tire absolute top-0 right-4 w-16 h-12 rounded-xl bg-gray-800 border-2 border-gray-600 text-xs font-bold flex flex-col items-center justify-center transition transform active:scale-90 disabled:opacity-50">
+              <span>앞-우</span>
+              <span class="text-[10px] text-red-400">OLD</span>
+            </button>
+            <button id="tire-fr" onclick="changeTire('fr')" disabled class="pit-tire absolute bottom-0 right-4 w-16 h-12 rounded-xl bg-gray-800 border-2 border-gray-600 text-xs font-bold flex flex-col items-center justify-center transition transform active:scale-90 disabled:opacity-50">
+              <span>앞-좌</span>
+              <span class="text-[10px] text-red-400">OLD</span>
+            </button>
+            <button id="tire-rl" onclick="changeTire('rl')" disabled class="pit-tire absolute top-0 left-4 w-16 h-12 rounded-xl bg-gray-800 border-2 border-gray-600 text-xs font-bold flex flex-col items-center justify-center transition transform active:scale-90 disabled:opacity-50">
+              <span>뒤-우</span>
+              <span class="text-[10px] text-red-400">OLD</span>
+            </button>
+            <button id="tire-rr" onclick="changeTire('rr')" disabled class="pit-tire absolute bottom-0 left-4 w-16 h-12 rounded-xl bg-gray-800 border-2 border-gray-600 text-xs font-bold flex flex-col items-center justify-center transition transform active:scale-90 disabled:opacity-50">
+              <span>뒤-좌</span>
+              <span class="text-[10px] text-red-400">OLD</span>
+            </button>
+          </div>
+
+          <button id="pit-start-btn" onclick="startPitstopGame()" class="mt-6 bg-f1red hover:bg-red-700 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg transition transform hover:scale-105">
+            🏁 피트인 시작하기!
+          </button>
+        </div>
+      </div>
+
+      <!-- MINI-GAME 3: 나의 F1 팀 찾기 -->
+      <div id="game-panel-teamfinder" class="game-panel hidden bg-f1card border border-f1border rounded-3xl p-6 sm:p-8">
+        <div class="mb-6">
+          <h3 class="text-xl sm:text-2xl font-bold">❤️ 나와 찰떡궁합인 2026 F1 팀 찾기</h3>
+          <p class="text-sm text-gray-400">3가지 간단한 질문에 답하면 당신과 가장 잘 어울리는 2026 F1 응원팀과 나만의 팬 카드를 만들어드려요!</p>
+        </div>
+
+        <div id="team-finder-container">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- MINI-GAME 4: 레이스 순서 맞추기 -->
+      <div id="game-panel-order" class="game-panel hidden bg-f1card border border-f1border rounded-3xl p-6 sm:p-8">
+        <div class="mb-6">
+          <h3 class="text-xl sm:text-2xl font-bold">📅 그랑프리 주말 순서 맞추기</h3>
+          <p class="text-sm text-gray-400">금요일부터 일요일까지 진행되는 F1 경기 순서를 올바른 차례대로 클릭해서 배열해보세요!</p>
+        </div>
+
+        <div id="order-game-container" class="space-y-6">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Next Section CTA -->
+      <div class="mt-10 flex justify-between items-center bg-f1card border border-f1border p-5 rounded-2xl">
+        <div>
+          <span class="text-xs text-gray-400">다음 단계</span>
+          <div class="font-bold text-white">실제 TV 중계 화면의 숫자와 기호 해독하기</div>
+        </div>
+        <button onclick="navigateTo('broadcast')" class="bg-f1red hover:bg-red-700 text-white font-bold px-5 py-3 rounded-xl transition flex items-center space-x-2">
+          <span>F. 중계 화면</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION F: F1 중계 화면 읽기 ==================== -->
+    <section id="view-broadcast" class="view-section hidden max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div class="mb-8">
+        <span class="text-f1red font-racing text-xs font-bold tracking-widest uppercase">CHAPTER F · TV GRAPHICS GUIDE</span>
+        <h2 class="text-3xl sm:text-4xl font-black mt-1">F1 중계 화면 읽기</h2>
+        <p class="text-gray-400 mt-2">실제 F1 생중계를 틀면 왼쪽에 나타나는 순위표(타이밍 타워)입니다. <strong class="text-white">궁금한 항목을 직접 클릭</strong>해보세요!</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- Simulated TV Timing Tower (7 Cols) -->
+        <div class="lg:col-span-7 bg-[#0E0E14] border border-f1border rounded-3xl p-4 sm:p-6 shadow-2xl">
+          <!-- Top Race Status Bar -->
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-gray-800">
+            <div class="flex items-center space-x-2">
+              <span class="bg-f1red text-white font-racing font-black italic px-2 py-0.5 rounded text-sm">F1</span>
+              <span class="font-racing font-bold text-sm text-white">LAP <span class="text-f1red">38</span> / 58</span>
+            </div>
+            <!-- Clickable Status Badges -->
+            <div class="flex items-center space-x-2">
+              <button onclick="explainBroadcast('sc')" class="bg-yellow-400 text-black font-racing font-black text-xs px-3 py-1 rounded-md hover:scale-105 transition flex items-center space-x-1 shadow">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span>SC (세이프티 카)</span>
+              </button>
+              <button onclick="explainBroadcast('drs_override')" class="bg-emerald-500/20 border border-emerald-400 text-emerald-300 font-racing font-bold text-xs px-2.5 py-1 rounded-md hover:scale-105 transition">
+                OVERTAKE MODE
+              </button>
+            </div>
+          </div>
+
+          <!-- Column Headers (Clickable) -->
+          <div class="grid grid-cols-12 text-[11px] font-racing text-gray-400 px-3 pb-2 border-b border-gray-800/80">
+            <button onclick="explainBroadcast('pos')" class="col-span-2 text-left hover:text-f1red underline decoration-dotted">POS</button>
+            <button onclick="explainBroadcast('driver')" class="col-span-4 text-left hover:text-f1red underline decoration-dotted">DRIVER</button>
+            <button onclick="explainBroadcast('gap')" class="col-span-3 text-right hover:text-f1red underline decoration-dotted">GAP / INT</button>
+            <button onclick="explainBroadcast('tire')" class="col-span-2 text-center hover:text-f1red underline decoration-dotted">TYRE</button>
+            <button onclick="explainBroadcast('pit')" class="col-span-1 text-right hover:text-f1red underline decoration-dotted">PIT</button>
+          </div>
+
+          <!-- Timing Rows (2026 Drivers Sample Data) -->
+          <div class="divide-y divide-gray-800/60 text-sm font-medium mt-1">
+            <!-- Row 1 -->
+            <div onclick="explainBroadcast('gap')" class="grid grid-cols-12 items-center px-3 py-2.5 hover:bg-white/5 cursor-pointer rounded-lg transition">
+              <div class="col-span-2 font-racing font-black text-white">1</div>
+              <div class="col-span-4 flex items-center space-x-2">
+                <span class="w-1 h-4 bg-[#00D2BE] rounded-full"></span>
+                <span class="font-bold tracking-wider">ANT</span>
+                <span class="text-[10px] text-gray-500 hidden sm:inline">안토넬리</span>
+              </div>
+              <div class="col-span-3 text-right font-racing text-xs text-yellow-400 font-bold">Leader</div>
+              <div class="col-span-2 flex justify-center">
+                <span onclick="event.stopPropagation(); explainBroadcast('tire')" class="w-6 h-6 rounded-full border-2 border-white text-white font-racing text-xs flex items-center justify-center font-bold">H</span>
+              </div>
+              <div class="col-span-1 text-right font-racing text-xs text-gray-400">1</div>
+            </div>
+
+            <!-- Row 2 -->
+            <div onclick="explainBroadcast('gap')" class="grid grid-cols-12 items-center px-3 py-2.5 hover:bg-white/5 cursor-pointer rounded-lg transition">
+              <div class="col-span-2 font-racing font-black text-white">2</div>
+              <div class="col-span-4 flex items-center space-x-2">
+                <span class="w-1 h-4 bg-[#E8002D] rounded-full"></span>
+                <span class="font-bold tracking-wider">LEC</span>
+                <span class="text-[10px] text-gray-500 hidden sm:inline">르클레르</span>
+              </div>
+              <div class="col-span-3 text-right font-racing text-xs text-gray-200">+0.842</div>
+              <div class="col-span-2 flex justify-center">
+                <span onclick="event.stopPropagation(); explainBroadcast('tire')" class="w-6 h-6 rounded-full border-2 border-yellow-400 text-yellow-400 font-racing text-xs flex items-center justify-center font-bold">M</span>
+              </div>
+              <div class="col-span-1 text-right font-racing text-xs text-gray-400">1</div>
+            </div>
+
+            <!-- Row 3 (IN PIT Example) -->
+            <div onclick="explainBroadcast('pit')" class="grid grid-cols-12 items-center px-3 py-2.5 bg-f1red/10 hover:bg-f1red/20 cursor-pointer rounded-lg transition">
+              <div class="col-span-2 font-racing font-black text-white">3</div>
+              <div class="col-span-4 flex items-center space-x-2">
+                <span class="w-1 h-4 bg-[#3671C6] rounded-full"></span>
+                <span class="font-bold tracking-wider">VER</span>
+                <span class="text-[10px] text-gray-500 hidden sm:inline">베르스타펜</span>
+              </div>
+              <div class="col-span-3 text-right font-racing text-xs text-f1red font-bold animate-pulse">IN PIT</div>
+              <div class="col-span-2 flex justify-center">
+                <span onclick="event.stopPropagation(); explainBroadcast('tire')" class="w-6 h-6 rounded-full border-2 border-red-500 text-red-500 font-racing text-xs flex items-center justify-center font-bold">S</span>
+              </div>
+              <div class="col-span-1 text-right font-racing text-xs text-white font-bold">2</div>
+            </div>
+
+            <!-- Row 4 -->
+            <div onclick="explainBroadcast('gap')" class="grid grid-cols-12 items-center px-3 py-2.5 hover:bg-white/5 cursor-pointer rounded-lg transition">
+              <div class="col-span-2 font-racing font-black text-white">4</div>
+              <div class="col-span-4 flex items-center space-x-2">
+                <span class="w-1 h-4 bg-[#FF8000] rounded-full"></span>
+                <span class="font-bold tracking-wider">NOR</span>
+                <span class="text-[10px] text-gray-500 hidden sm:inline">노리스</span>
+              </div>
+              <div class="col-span-3 text-right font-racing text-xs text-gray-200">+4.115</div>
+              <div class="col-span-2 flex justify-center">
+                <span onclick="event.stopPropagation(); explainBroadcast('tire')" class="w-6 h-6 rounded-full border-2 border-white text-white font-racing text-xs flex items-center justify-center font-bold">H</span>
+              </div>
+              <div class="col-span-1 text-right font-racing text-xs text-gray-400">1</div>
+            </div>
+
+            <!-- Row 5 -->
+            <div onclick="explainBroadcast('gap')" class="grid grid-cols-12 items-center px-3 py-2.5 hover:bg-white/5 cursor-pointer rounded-lg transition">
+              <div class="col-span-2 font-racing font-black text-white">5</div>
+              <div class="col-span-4 flex items-center space-x-2">
+                <span class="w-1 h-4 bg-[#E8002D] rounded-full"></span>
+                <span class="font-bold tracking-wider">HAM</span>
+                <span class="text-[10px] text-gray-500 hidden sm:inline">해밀턴</span>
+              </div>
+              <div class="col-span-3 text-right font-racing text-xs text-gray-200">+5.920</div>
+              <div class="col-span-2 flex justify-center">
+                <span onclick="event.stopPropagation(); explainBroadcast('tire')" class="w-6 h-6 rounded-full border-2 border-yellow-400 text-yellow-400 font-racing text-xs flex items-center justify-center font-bold">M</span>
+              </div>
+              <div class="col-span-1 text-right font-racing text-xs text-gray-400">1</div>
+            </div>
+
+            <!-- Row 6 (DNF Example) -->
+            <div onclick="explainBroadcast('dnf')" class="grid grid-cols-12 items-center px-3 py-2.5 opacity-60 hover:opacity-100 hover:bg-white/5 cursor-pointer rounded-lg transition">
+              <div class="col-span-2 font-racing font-bold text-gray-500">-</div>
+              <div class="col-span-4 flex items-center space-x-2">
+                <span class="w-1 h-4 bg-[#229971] rounded-full"></span>
+                <span class="font-bold tracking-wider text-gray-400 line-through">ALO</span>
+                <span class="text-[10px] text-gray-500 hidden sm:inline">알론소</span>
+              </div>
+              <div class="col-span-3 text-right font-racing text-xs text-gray-400 font-bold">DNF</div>
+              <div class="col-span-2 flex justify-center">
+                <span class="text-xs text-gray-500">-</span>
+              </div>
+              <div class="col-span-1 text-right font-racing text-xs text-gray-500">1</div>
+            </div>
+          </div>
+
+          <p class="text-[11px] text-gray-500 mt-4 text-center">※ 위 순위표는 입문자 이해를 돕기 위해 제작된 가상 중계 예시입니다.</p>
+        </div>
+
+        <!-- Explanation Panel (5 Cols) -->
+        <div class="lg:col-span-5 space-y-4">
+          <div id="broadcast-explanation-box" class="bg-f1card border-2 border-f1red rounded-3xl p-6 shadow-xl">
+            <!-- Populated by JS -->
+          </div>
+
+          <!-- Quick Term Buttons -->
+          <div class="bg-f1card border border-f1border rounded-2xl p-4">
+            <div class="text-xs text-gray-400 mb-2.5 font-bold">용어 바로 눌러보기</div>
+            <div class="flex flex-wrap gap-2">
+              <button onclick="explainBroadcast('gap')" class="px-3 py-1.5 rounded-lg bg-f1dark hover:bg-f1red text-xs font-bold transition">GAP (시간 격차)</button>
+              <button onclick="explainBroadcast('tire')" class="px-3 py-1.5 rounded-lg bg-f1dark hover:bg-f1red text-xs font-bold transition">S / M / H (타이어)</button>
+              <button onclick="explainBroadcast('pit')" class="px-3 py-1.5 rounded-lg bg-f1dark hover:bg-f1red text-xs font-bold transition">IN PIT (피트인)</button>
+              <button onclick="explainBroadcast('sc')" class="px-3 py-1.5 rounded-lg bg-f1dark hover:bg-f1red text-xs font-bold transition">SC (세이프티 카)</button>
+              <button onclick="explainBroadcast('dnf')" class="px-3 py-1.5 rounded-lg bg-f1dark hover:bg-f1red text-xs font-bold transition">DNF (리타이어)</button>
+              <button onclick="explainBroadcast('drs_override')" class="px-3 py-1.5 rounded-lg bg-f1dark hover:bg-f1red text-xs font-bold transition">2026 추월 모드</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Next Section CTA -->
+      <div class="mt-10 flex justify-between items-center bg-f1card border border-f1border p-5 rounded-2xl">
+        <div>
+          <span class="text-xs text-gray-400">마지막 관문</span>
+          <div class="font-bold text-white">10문제 입문자 퀴즈 풀고 내 팬 등급 확인하기!</div>
+        </div>
+        <button onclick="navigateTo('quiz')" class="bg-f1red hover:bg-red-700 text-white font-bold px-5 py-3 rounded-xl transition flex items-center space-x-2">
+          <span>G. 입문자 퀴즈</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION G: F1 입문자 퀴즈 ==================== -->
+    <section id="view-quiz" class="view-section hidden max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div class="mb-8 text-center">
+        <span class="text-f1red font-racing text-xs font-bold tracking-widest uppercase">CHAPTER G · FINAL CHECK</span>
+        <h2 class="text-3xl sm:text-4xl font-black mt-1">F1 입문자 퀴즈 (10문항)</h2>
+        <p class="text-gray-400 mt-2">지금까지 배운 내용을 바탕으로 나의 F1 입문 레벨을 테스트해보세요!</p>
+      </div>
+
+      <div id="quiz-container" class="bg-f1card border border-f1border rounded-3xl p-6 sm:p-8 shadow-2xl">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Team Detail Modal -->
+  <div id="team-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4" onclick="closeTeamModal(event)">
+    <div class="bg-f1card border border-f1border rounded-3xl max-w-2xl w-full p-6 sm:p-8 relative shadow-2xl max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+      <button onclick="closeTeamModal()" class="absolute top-5 right-5 w-9 h-9 rounded-full bg-white/10 hover:bg-f1red text-white flex items-center justify-center transition">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div id="team-modal-content">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="border-t border-f1border bg-f1dark py-8 mt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-400">
+      <div class="flex items-center space-x-2">
+        <span class="bg-f1red text-white font-racing font-black italic px-2 py-0.5 rounded">F1</span>
+        <span>F1 Beginner Experience · 2026 시즌 기준 입문자 가이드</span>
+      </div>
+      <div>
+        실제 2026 FIA F1 엔트리 및 규정을 바탕으로 제작되었으며, 미니게임 및 중계 예시는 학습용 가상 시뮬레이션입니다.
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== JAVASCRIPT APPLICATION LOGIC ==================== -->
+  <script>
+    // ---------------------------------------------------------
+    // 1. STATE & NAVIGATION MANAGEMENT
+    // ---------------------------------------------------------
+    const visitedSections = new Set(['home']);
+    const allSectionIds = ['intro', 'teams', 'car', 'weekend', 'play', 'broadcast', 'quiz'];
+
+    function navigateTo(sectionId) {
+      // Hide all views
+      document.querySelectorAll('.view-section').forEach(sec => sec.classList.add('hidden'));
+      // Show target view
+      const target = document.getElementById(`view-${sectionId}`);
+      if (target) {
+        target.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      // Update active nav styling
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        if (btn.dataset.nav === sectionId) {
+          btn.classList.add('bg-f1red', 'text-white');
+          btn.classList.remove('text-gray-300');
+        } else {
+          btn.classList.remove('bg-f1red', 'text-white');
+          btn.classList.add('text-gray-300');
+        }
+      });
+
+      // Track progress
+      if (allSectionIds.includes(sectionId)) {
+        visitedSections.add(sectionId);
+        updateProgressUI();
+      }
+
+      // Trigger resize on speed canvas if play section opened
+      if (sectionId === 'play') {
+        setTimeout(resizeSpeedCanvas, 50);
+      }
+    }
+
+    function updateProgressUI() {
+      const completed = Array.from(visitedSections).filter(id => allSectionIds.includes(id)).length;
+      const pct = Math.max(14, Math.round((completed / allSectionIds.length) * 100));
+      document.getElementById('global-progress-bar').style.width = `${pct}%`;
+      document.getElementById('progress-text').textContent = `${completed}/${allSectionIds.length}`;
+    }
+
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobile-menu');
+      menu.classList.toggle('hidden');
+    }
+
+    function openTeamFinderDirectly() {
+      navigateTo('play');
+      switchGameTab('teamfinder');
+    }
+
+    // Generate Hero Speed Lines
+    function initHeroLines() {
+      const container = document.getElementById('hero-speed-lines');
+      for (let i = 0; i < 14; i++) {
+        const line = document.createElement('div');
+        line.className = 'speed-line';
+        line.style.top = `${Math.random() * 100}%`;
+        line.style.width = `${80 + Math.random() * 180}px`;
+        line.style.animationDuration = `${1.2 + Math.random() * 2}s`;
+        line.style.animationDelay = `${Math.random() * 2}s`;
+        container.appendChild(line);
+      }
+    }
+
+    // ---------------------------------------------------------
+    // 2. CHAPTER A: Q&A DATA & RENDERING
+    // ---------------------------------------------------------
+    const faqData = [
+      {
+        q: "Q1. F1(Formula 1)은 정확히 무슨 뜻인가요?",
+        a: "‘포뮬러(Formula)’는 모든 참가 팀이 반드시 지켜야 하는 엄격한 자동차 제작 규칙을 뜻하고, ‘1’은 자동차 레이싱 세계의 최고 등급(1부 리그)을 의미합니다. 즉, 세계에서 가장 빠르고 기술력이 뛰어난 자동차 경주 대회입니다.",
+        more: "F1 아래에는 입문 단계인 F3, F2가 있어 유망주 드라이버들이 단계를 밟아 F1으로 올라옵니다."
+      },
+      {
+        q: "Q2. 일반 도로 위 스포츠카 경주와 무엇이 다른가요?",
+        a: "페라리나 포르쉐 같은 시판 스포츠카를 개조하는 대회와 달리, F1 자동차는 지붕과 바퀴 덮개가 없는 ‘오픈 휠(Open-Wheel)’ 1인승 경주차입니다. 오직 서킷(경주장)을 가장 빠르게 달리기 위해 각 팀이 매년 새로 설계합니다.",
+        more: "2026년부터는 차체가 이전보다 더 작고 가벼워져(최소 중량 768kg) 코너에서 더욱 민첩한 추월 장면이 연출됩니다."
+      },
+      {
+        q: "Q3. 드라이버 혼자 잘하면 우승하나요?",
+        a: "절대 아닙니다! F1은 11개 팀(컨스트럭터)이 각각 2대의 차를 출전시키는 팀 스포츠입니다. 아무리 운전이 뛰어난 드라이버라도 팀이 빠른 차를 만들어주고, 피트스톱에서 2초 만에 타이어를 갈아주지 못하면 우승하기 어렵습니다.",
+        more: "그래서 F1에는 ‘드라이버 챔피언십(개인전)’과 ‘컨스트럭터 챔피언십(팀전)’ 두 개의 트로피가 존재합니다."
+      },
+      {
+        q: "Q4. 한 시즌은 어떻게 진행되나요?",
+        a: "매년 3월부터 12월까지 전 세계 약 20개 이상의 도시를 돌며 경기를 치릅니다. 한 번의 주말 대회를 ‘그랑프리(Grand Prix)’라고 부르며, 각 경기 순위에 따라 점수를 모아 연말에 최종 챔피언을 가립니다.",
+        more: "2026년 시즌은 3월 호주 그랑프리로 개막해 12월 아부다비 그랑프리까지 대장정을 펼칩니다."
+      },
+      {
+        q: "Q5. 처음 볼 때 가장 재미있는 관전 포인트는 무엇인가요?",
+        a: "① 출발 신호등 5개가 꺼지는 순간의 폭발적 스타트! ② 시속 300km가 넘는 직선 구간에서의 추월! ③ 언제 타이어를 바꿀지 눈치 싸움을 벌이는 피트스톱 전략! 이 세 가지만 봐도 시간 가는 줄 모릅니다.",
+        more: "특히 2026년에는 앞차와 1초 이내로 접근하면 추가 전기 부스트를 쓰는 ‘오버테이크 모드’가 도입되어 추월이 더욱 흥미진진해졌습니다."
+      }
+    ];
+
+    function renderFaq() {
+      const container = document.getElementById('faq-container');
+      container.innerHTML = faqData.map((item, idx) => `
+        <div class="bg-f1card border border-f1border rounded-2xl overflow-hidden transition">
+          <button onclick="toggleFaq(${idx})" class="w-full p-5 text-left flex items-center justify-between gap-4 hover:bg-white/5 transition">
+            <span class="font-bold text-base sm:text-lg text-white">${item.q}</span>
+            <i id="faq-icon-${idx}" class="fa-solid fa-chevron-down text-f1red transition-transform ${idx === 0 ? 'rotate-180' : ''}"></i>
+          </button>
+          <div id="faq-body-${idx}" class="${idx === 0 ? '' : 'hidden'} px-5 pb-5 pt-1 border-t border-f1border/50 text-sm text-gray-300 leading-relaxed space-y-3">
+            <p>${item.a}</p>
+            <div class="bg-f1dark/90 border border-f1border rounded-xl p-3 text-xs text-gray-400">
+              <span class="text-f1red font-bold mr-1">➕ 더 알아보기:</span> ${item.more}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleFaq(idx) {
+      const body = document.getElementById(`faq-body-${idx}`);
+      const icon = document.getElementById(`faq-icon-${idx}`);
+      body.classList.toggle('hidden');
+      icon.classList.toggle('rotate-180');
+    }
+
+    // ---------------------------------------------------------
+    // 3. CHAPTER B: 2026 TEAMS & DRIVERS DATA
+    // ---------------------------------------------------------
+    const teams2026 = [
+      {
+        id: 'mercedes',
+        name: '메르세데스-AMG 페트로나스',
+        short: 'Mercedes',
+        color: '#00D2BE',
+        engine: 'Mercedes',
+        tagline: '실버 애로우의 화려한 부활과 신성의 질주',
+        summary: '과거 8년 연속 챔피언을 차지했던 명문 팀으로, 2026년 새 규정과 함께 다시 최정상급 퍼포먼스를 보여주고 있습니다.',
+        drivers: [
+          { num: 63, name: '조지 러셀', trait: '완벽주의 리더', desc: '안정적인 경기 운영과 빠른 예선 랩타임을 자랑하는 메르세데스의 에이스.' },
+          { num: 12, name: '키미 안토넬리', trait: '이탈리아 천재 신성', desc: '10대에 F1에 데뷔해 2026년 우승 경쟁을 이끄는 초신성 드라이버.' }
+        ]
+      },
+      {
+        id: 'ferrari',
+        name: '스쿠데리아 페라리 HP',
+        short: 'Ferrari',
+        color: '#E8002D',
+        engine: 'Ferrari',
+        tagline: 'F1의 심장, 붉은 전설의 드림팀',
+        summary: '1950년 F1 출범부터 한 번도 빠지지 않은 가장 역사가 깊은 팀입니다. 전 세계에 가장 열정적인 팬덤(티포시)을 보유하고 있습니다.',
+        drivers: [
+          { num: 16, name: '샤를 르클레르', trait: '모나코의 왕자', desc: '한 바퀴 폭발적인 스피드가 일품인 페라리의 프랜차이즈 스타.' },
+          { num: 44, name: '루이스 해밀턴', trait: '살아있는 전설 (7회 챔피언)', desc: 'F1 역사상 최다 우승 기록 보유자. 페라리에서 통산 8번째 챔피언에 도전합니다.' }
+        ]
+      },
+      {
+        id: 'mclaren',
+        name: '맥라렌 마스터카드 F1 팀',
+        short: 'McLaren',
+        color: '#FF8000',
+        engine: 'Mercedes',
+        tagline: '파파야 오렌지 돌풍, 디펜딩 챔피언의 저력',
+        summary: '눈부신 기술 발전으로 최정상 자리를 되찾은 전통의 강호입니다. 두 젊은 에이스가 동등하게 경쟁하는 팀 분위기가 특징입니다.',
+        drivers: [
+          { num: 1, name: '랜도 노리스', trait: '유쾌한 스피드스터', desc: '챔피언 번호 1번을 달고 달리는 맥라렌의 간판스타. 엄청난 팬 인기를 자랑합니다.' },
+          { num: 81, name: '오스카 피아스트리', trait: '냉철한 승부사', desc: '침착한 판단력과 과감한 추월 능력을 겸비한 호주 출신 실력파.' }
+        ]
+      },
+      {
+        id: 'redbull',
+        name: '오라클 레드불 레이싱',
+        short: 'Red Bull Racing',
+        color: '#3671C6',
+        engine: 'Red Bull Ford',
+        tagline: '한계를 모르는 공격적 레이싱과 포드 엔진의 만남',
+        summary: '에너지 음료 브랜드에서 시작해 F1을 제패한 팀입니다. 2026년부터는 포드(Ford)와 손잡고 자체 제작 파워유닛 시대를 열었습니다.',
+        drivers: [
+          { num: 3, name: '막스 베르스타펜', trait: '타고난 레이싱 괴물', desc: '4회 월드 챔피언에 빛나는 현시대 최강 드라이버 중 한 명. 거침없는 추월이 매력입니다.' },
+          { num: 6, name: '이자크 아자르', trait: '패기 넘치는 승격 루키', desc: '주니어 팀에서 맹활약 후 2026년 레드불 1군 시트를 꿰찬 프랑스 기대주.' }
+        ]
+      },
+      {
+        id: 'astonmartin',
+        name: '애스턴 마틴 아람코',
+        short: 'Aston Martin',
+        color: '#229971',
+        engine: 'Honda',
+        tagline: '브리티시 그린의 야망과 혼다 엔진의 결합',
+        summary: '영국 럭셔리 스포츠카 브랜드로, 2026년부터 혼다(Honda)의 공식 워크스 엔진을 공급받으며 챔피언십 도약을 노립니다.',
+        drivers: [
+          { num: 14, name: '페르난도 알론소', trait: '백전노장 사무라이', desc: '2회 월드 챔피언 출신으로, 40대에도 여전히 날카로운 주행을 보여주는 살아있는 교과서.' },
+          { num: 18, name: '랜스 스트롤', trait: '빗길의 강자', desc: '스타트 순발력과 궂은 날씨에서의 감각이 돋보이는 캐나다 드라이버.' }
+        ]
+      },
+      {
+        id: 'alpine',
+        name: 'BWT 알핀 F1 팀',
+        short: 'Alpine',
+        color: '#FF87BC',
+        engine: 'Mercedes',
+        tagline: '프랑스 감성과 남미 열정의 만남',
+        summary: '르노 그룹의 스포츠카 브랜드 팀으로, 2026년부터 메르세데스 파워유닛을 채택해 반등을 꾀하고 있습니다.',
+        drivers: [
+          { num: 10, name: '피에르 개슬리', trait: '꾸준한 포인트 사냥꾼', desc: '중위권 싸움에서 빛나는 집중력과 레이스 운영 능력을 갖춘 프랑스 드라이버.' },
+          { num: 43, name: '프랑코 콜라핀토', trait: '아르헨티나의 신성', desc: '뜨거운 남미 팬들의 응원을 받으며 2026 풀타임 시트를 차지한 패기 넘치는 드라이버.' }
+        ]
+      },
+      {
+        id: 'williams',
+        name: '아틀라시안 윌리엄스 레이싱',
+        short: 'Williams',
+        color: '#005AFF',
+        engine: 'Mercedes',
+        tagline: '명가의 부활을 꿈꾸는 화려한 라인업',
+        summary: '과거 9번의 팀 우승을 차지한 전통의 명가입니다. 경험 많은 두 명의 실력파 드라이버와 함께 상위권 도약을 노립니다.',
+        drivers: [
+          { num: 23, name: '알렉산더 알본', trait: '타이어 관리의 마법사', desc: '타이어를 아끼며 한 번의 피트스톱으로 순위를 끌어올리는 전략 주행의 달인.' },
+          { num: 55, name: '카를로스 사인츠', trait: '스무스 오퍼레이터', desc: '페라리에서 활약 후 윌리엄스의 부활을 이끌기 위해 합류한 전략가형 드라이버.' }
+        ]
+      },
+      {
+        id: 'racingbulls',
+        name: '비자 캐시 앱 레이싱 불스',
+        short: 'Racing Bulls',
+        color: '#6692FF',
+        engine: 'Red Bull Ford',
+        tagline: '미래의 챔피언들이 성장하는 젊은 에너지',
+        summary: '레드불의 자매 팀으로, 재능 있는 젊은 드라이버들이 F1 무대에서 실력을 증명하는 등용문 역할을 합니다.',
+        drivers: [
+          { num: 30, name: '리암 로슨', trait: '거침없는 파이터', desc: '어떤 상황에서도 주눅 들지 않고 휠투휠 배틀을 즐기는 뉴질랜드 드라이버.' },
+          { num: 41, name: '아르비드 린드블라드', trait: '2026 최연소 루키', desc: 'F2에서 초고속 승격한 레드불 육성 프로그램의 차세대 기대주.' }
+        ]
+      },
+      {
+        id: 'audi',
+        name: '아우디 레볼루트 F1 팀',
+        short: 'Audi',
+        color: '#F50537',
+        engine: 'Audi',
+        tagline: '2026년 F1에 출사표를 던진 독일 기술의 자존심',
+        summary: '기존 자우버 팀을 인수해 2026년 공식 데뷔한 아우디 팩토리 팀입니다. 자체 개발한 하이브리드 엔진으로 새로운 역사를 씁니다.',
+        drivers: [
+          { num: 27, name: '니코 휠켄베르크', trait: '베테랑의 품격', desc: '풍부한 경험으로 신생 아우디 머신의 개발 방향을 잡아주는 든든한 맏형.' },
+          { num: 5, name: '가브리에우 보르툴레투', trait: '브라질의 희망', desc: 'F3·F2를 연달아 제패하고 아우디의 미래를 책임질 브라질 신예.' }
+        ]
+      },
+      {
+        id: 'haas',
+        name: 'TGR 하스 F1 팀',
+        short: 'Haas',
+        color: '#B6BABD',
+        engine: 'Ferrari',
+        tagline: '실속 있는 운영과 반전의 다크호스',
+        summary: '토요타 가주 레이싱(TGR)과 기술 파트너십을 맺고 효율적인 운영으로 강팀들을 위협하는 다크호스 팀입니다.',
+        drivers: [
+          { num: 31, name: '에스테반 오콘', trait: '끈질긴 수비수', desc: '치열한 중위권 몸싸움에서 쉽게 자리를 내주지 않는 끈기의 드라이버.' },
+          { num: 87, name: '올리버 베어먼', trait: '영국의 젊은 재능', desc: '대타 데뷔전부터 강렬한 인상을 남긴 차세대 주자.' }
+        ]
+      },
+      {
+        id: 'cadillac',
+        name: '캐딜락 포뮬러 1 팀',
+        short: 'Cadillac',
+        color: '#D4AF37',
+        engine: 'Ferrari',
+        tagline: '11번째 팀으로 합류한 아메리칸 럭셔리',
+        summary: 'GM(제너럴 모터스)의 캐딜락이 2026년 11번째 신규 팀으로 F1 그리드에 합류했습니다! 베테랑 듀오를 영입해 안정적인 첫 시즌을 치르고 있습니다.',
+        drivers: [
+          { num: 11, name: '세르히오 페레즈', trait: '스트리트 서킷의 왕', desc: '다수의 우승 경험을 바탕으로 신생 캐딜락 팀의 중심을 잡는 멕시코 국민 영웅.' },
+          { num: 77, name: '발테리 보타스', trait: '핀란드의 베테랑', desc: '메르세데스 시절 수많은 우승을 경험한 베테랑으로 팀의 첫 발걸음을 이끕니다.' }
+        ]
+      }
+    ];
+
+    function renderTeams() {
+      const grid = document.getElementById('teams-grid');
+      grid.innerHTML = teams2026.map(team => `
+        <div onclick="openTeamModal('${team.id}')" class="cursor-pointer bg-f1card hover:bg-f1card/80 border border-f1border hover:border-white/40 rounded-2xl overflow-hidden transition-all transform hover:-translate-y-1 shadow-lg group">
+          <!-- Team Color Top Strip -->
+          <div class="h-2.5 w-full" style="background-color: ${team.color};"></div>
+          <div class="p-5">
+            <div class="flex items-center justify-between mb-3">
+              <span class="font-racing font-black text-lg tracking-tight text-white group-hover:text-f1red transition">${team.short}</span>
+              <span class="text-[11px] bg-f1dark border border-f1border px-2.5 py-0.5 rounded-full text-gray-400">PU: ${team.engine}</span>
+            </div>
+            <p class="text-xs text-gray-400 mb-4 line-clamp-1">${team.tagline}</p>
+
+            <!-- Drivers Mini Pills -->
+            <div class="space-y-2">
+              ${team.drivers.map(d => `
+                <div class="flex items-center justify-between bg-f1dark/90 px-3 py-2 rounded-xl border border-f1border/60">
+                  <div class="flex items-center space-x-2.5">
+                    <span class="font-racing font-black text-xs w-6 text-center" style="color: ${team.color};">#${d.num}</span>
+                    <span class="font-bold text-sm text-gray-100">${d.name}</span>
+                  </div>
+                  <span class="text-[11px] text-gray-400">${d.trait}</span>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-f1border/60 flex items-center justify-between text-xs text-gray-400 group-hover:text-white">
+              <span>팀 스토리 & 드라이버 상세 보기</span>
+              <i class="fa-solid fa-plus"></i>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openTeamModal(teamId) {
+      const team = teams2026.find(t => t.id === teamId);
+      if (!team) return;
+
+      const content = document.getElementById('team-modal-content');
+      content.innerHTML = `
+        <div class="inline-block px-3 py-1 rounded-full text-xs font-bold mb-3 text-black" style="background-color: ${team.color};">
+          2026 CONSTRUCTOR
+        </div>
+        <h3 class="text-2xl sm:text-3xl font-black text-white">${team.name}</h3>
+        <p class="text-sm text-gray-300 font-medium mt-1">${team.tagline}</p>
+
+        <div class="mt-4 p-4 bg-f1dark rounded-2xl border border-f1border text-sm text-gray-300 leading-relaxed">
+          ${team.summary}
+          <div class="mt-2 text-xs text-gray-400">⚙️ 사용 파워유닛(엔진): <strong class="text-white">${team.engine}</strong></div>
+        </div>
+
+        <h4 class="font-bold text-base mt-6 mb-3 flex items-center space-x-2">
+          <i class="fa-solid fa-helmet-safety text-f1red"></i>
+          <span>2026 시즌 드라이버 라인업</span>
+        </h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          ${team.drivers.map(d => `
+            <div class="bg-f1dark border border-f1border rounded-2xl p-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="font-racing font-black text-2xl" style="color: ${team.color};">#${d.num}</span>
+                <span class="text-xs bg-white/10 px-2.5 py-0.5 rounded-full text-gray-200">${d.trait}</span>
+              </div>
+              <div class="font-bold text-lg text-white mb-1">${d.name}</div>
+              <p class="text-xs text-gray-400 leading-relaxed">${d.desc}</p>
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+      const modal = document.getElementById('team-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeTeamModal() {
+      const modal = document.getElementById('team-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // ---------------------------------------------------------
+    // 4. CHAPTER C: INTERACTIVE CAR PARTS
+    // ---------------------------------------------------------
+    const carPartsData = {
+      frontWing: {
+        num: '01',
+        title: '프론트 윙 (Front Wing)',
+        subtitle: '공기를 가장 먼저 가르는 조종석의 지휘자',
+        desc: '일반 자동차에는 없는 거대한 앞날개입니다. 달릴 때 맞바람을 아래로 눌러 앞바퀴가 땅에 쫀득하게 붙도록(다운포스) 만들어 줍니다. 덕분에 시속 250km에서도 핸들을 꺾으면 미끄러지지 않고 칼같이 코너를 돕니다.',
+        spec2026: '2026 규정에서는 앞날개가 더 좁고 단순해졌으며, 직선 구간에서 날개 각도가 펴지는 액티브 에어로 기능이 연동됩니다.'
+      },
+      halo: {
+        num: '02',
+        title: '헤일로 (Halo · 드라이버 안전장치)',
+        subtitle: '드라이버의 생명을 지키는 티타늄 방패',
+        desc: '운전석 위를 감싸고 있는 Y자 모양의 튼튼한 티타늄 구조물입니다. 사고 시 날아오는 파편이나 다른 차와의 충돌로부터 드라이버의 머리를 완벽하게 보호합니다. 2층 버스 무게(약 12톤)가 위에서 눌러도 버틸 만큼 강합니다!',
+        spec2026: '2026년 규정에서는 차체 전복 시 드라이버를 보호하는 롤 후프(Roll Hoop)의 안전 강도가 기존 16G에서 20G로 더욱 강화되었습니다.'
+      },
+      powerUnit: {
+        num: '03',
+        title: '2026 하이브리드 파워유닛 (50:50 엔진)',
+        subtitle: '가솔린 엔진 + 초강력 전기 모터의 결합',
+        desc: 'F1 자동차는 1.6리터 V6 터보 엔진과 브레이크를 밟을 때 에너지를 모으는 전기 배터리를 함께 씁니다. 열효율이 세계 최고 수준이라 적은 연료로도 1,000마력에 가까운 괴력을 냅니다.',
+        spec2026: '★ 2026 핵심 변화: 전기 모터 출력이 기존보다 약 3배 강력해져 가솔린 엔진 50% : 전기 출력 50% 비율로 달립니다. 또한 100% 지속가능 친환경 연료를 사용합니다!'
+      },
+      rearWing: {
+        num: '04',
+        title: '액티브 에어로 리어 윙 (Rear Wing)',
+        subtitle: '코너에선 누르고, 직선에선 펴지는 변신 날개',
+        desc: '뒤쪽의 거대한 날개는 뒷바퀴가 헛돌지 않게 땅으로 꾹 눌러줍니다. 하지만 직선 도로에서는 이 날개가 공기 저항(브레이크 역할)이 되기 때문에 상황에 따라 각도를 바꿉니다.',
+        spec2026: '★ 2026 핵심 변화: 과거의 DRS(추월 전용 날개 개방)가 사라지고, 모든 차가 직선에서 날개를 펴는 X-모드와 코너에서 접는 Z-모드를 쓰는 액티브 에어로가 도입되었습니다.'
+      },
+      tires: {
+        num: '05',
+        title: '슬릭 타이어 (Slick Tyres)',
+        subtitle: '지면과 맞닿는 유일한 접점, 초고성능 고무',
+        desc: '일반 승용차 타이어와 달리 빗물 배수 홈(트레드)이 전혀 없는 매끈한 타이어입니다. 땅에 닿는 면적을 최대화해 엄청난 접지력을 발휘하며, 주행 중 표면 온도가 약 100도까지 올라가 껌처럼 도로에 달라붙습니다.',
+        spec2026: '2026년 머신은 차체 크기가 작아지면서 앞뒤 타이어 폭도 이전보다 조금 더 날렵하게 줄어들었습니다.'
+      }
+    };
+
+    function selectCarPart(partKey) {
+      const data = carPartsData[partKey];
+      if (!data) return;
+
+      // Update hotspot & pill styles
+      document.querySelectorAll('.car-hotspot').forEach(btn => {
+        if (btn.dataset.part === partKey) {
+          btn.classList.add('ring-4', 'ring-yellow-400', 'scale-110');
+        } else {
+          btn.classList.remove('ring-4', 'ring-yellow-400', 'scale-110');
+        }
+      });
+
+      document.querySelectorAll('.part-pill').forEach(pill => {
+        if (pill.dataset.part === partKey) {
+          pill.classList.add('bg-f1red', 'text-white', 'border-f1red');
+          pill.classList.remove('bg-f1dark');
+        } else {
+          pill.classList.remove('bg-f1red', 'text-white', 'border-f1red');
+          pill.classList.add('bg-f1dark');
+        }
+      });
+
+      const panel = document.getElementById('car-part-detail');
+      panel.innerHTML = `
+        <div class="flex items-center space-x-2 mb-3">
+          <span class="bg-f1red text-white font-racing font-bold text-xs px-2.5 py-1 rounded">PART ${data.num}</span>
+          <span class="text-xs text-gray-400">클릭한 부품 상세 설명</span>
+        </div>
+        <h3 class="text-2xl font-black text-white">${data.title}</h3>
+        <p class="text-sm text-f1red font-bold mt-1">${data.subtitle}</p>
+        <p class="text-sm text-gray-300 leading-relaxed mt-4">${data.desc}</p>
+        <div class="mt-5 p-4 bg-f1dark rounded-2xl border border-f1border">
+          <div class="text-xs font-bold text-yellow-400 mb-1">🆕 2026 시즌 규정 포인트</div>
+          <p class="text-xs text-gray-300 leading-relaxed">${data.spec2026}</p>
+        </div>
+      `;
+    }
+
+    // ---------------------------------------------------------
+    // 5. CHAPTER D: RACE WEEKEND TIMELINE
+    // ---------------------------------------------------------
+    const weekendFormats = {
+      standard: [
+        { day: '금요일 (FRI)', badge: '연습 주행', title: '프랙티스 1 & 2 (Practice 1, 2)', icon: '🛠️', desc: '본격적인 경쟁 전, 각 서킷의 노면 상태와 바람을 파악하고 자동차 세팅을 맞추는 연습 시간입니다. 순위는 결승에 영향을 주지 않습니다.' },
+        { day: '토요일 오전 (SAT)', badge: '최종 점검', title: '프랙티스 3 (Practice 3)', icon: '⏱️', desc: '오후에 열릴 예선(퀄리파잉)을 앞두고 마지막으로 타이어 성능과 차량 컨디션을 점검하는 1시간의 연습 주행입니다.' },
+        { day: '토요일 오후 (SAT)', badge: '출발 순서 결정', title: '예선 / 퀄리파잉 (Qualifying)', icon: '⚡', desc: '가장 빠른 한 바퀴 기록을 겨뤄 일요일 결승전의 출발 순서(그리드)를 정합니다! Q1 → Q2 → Q3 세 단계로 탈락자를 가려내며, 1등 기록을 세운 드라이버가 맨 앞자리인 ‘폴 포지션(Pole Position)’을 차지합니다.' },
+        { day: '일요일 (SUN)', badge: '하이라이트 본경기', title: '결승 레이스 (Grand Prix Race)', icon: '🏁', desc: '약 305km 거리를 누가 가장 먼저 완주하는지 겨루는 본경기입니다! 의무적으로 최소 1번 이상 피트스톱을 해 다른 종류의 타이어로 교체해야 합니다.' },
+        { day: '일요일 경기 직후', badge: '시상식', title: '포디엄 세리머니 (Podium)', icon: '🍾', desc: '결승 1, 2, 3위 드라이버가 시상대(포디엄)에 올라 트로피를 받고 거대한 스파클링 와인을 서로에게 뿌리며 승리를 축하합니다!' }
+      ],
+      sprint: [
+        { day: '금요일 (FRI)', badge: '연습 1회 + 스프린트 예선', title: '프랙티스 1 & 스프린트 퀄리파잉', icon: '⚡', desc: '스프린트 주말에는 연습 주행이 단 1번뿐! 금요일 오후에 곧바로 토요일 미니 레이스의 출발 순서를 정하는 예선을 치릅니다.' },
+        { day: '토요일 오전 (SAT)', badge: '100km 미니 레이스', title: '스프린트 레이스 (Sprint)', icon: '🔥', desc: '타이어 교체 의무 없이 약 30분(100km) 동안 전력 질주하는 초단기 레이스! 1위부터 8위까지 소중한 챔피언십 포인트를 추가로 얻습니다.' },
+        { day: '토요일 오후 (SAT)', badge: '본선 출발 순서 결정', title: '본선 퀄리파잉 (Qualifying)', icon: '⏱️', desc: '스프린트가 끝나면 정비 후 일요일 메인 결승전의 출발 순서를 결정하는 정규 예선을 진행합니다.' },
+        { day: '일요일 (SUN)', badge: '메인 결승 & 포디엄', title: '그랑프리 결승 레이스 & 시상식', icon: '🏆', desc: '주말의 대미를 장식하는 메인 결승전과 포디엄 샴페인 세리머니가 펼쳐집니다.' }
+      ]
+    };
+
+    function switchWeekendFormat(type) {
+      const stdBtn = document.getElementById('btn-format-standard');
+      const sprBtn = document.getElementById('btn-format-sprint');
+      if (type === 'standard') {
+        stdBtn.className = 'px-4 py-2 rounded-lg text-sm font-bold bg-f1red text-white transition';
+        sprBtn.className = 'px-4 py-2 rounded-lg text-sm font-bold text-gray-300 hover:text-white transition';
+      } else {
+        sprBtn.className = 'px-4 py-2 rounded-lg text-sm font-bold bg-f1red text-white transition';
+        stdBtn.className = 'px-4 py-2 rounded-lg text-sm font-bold text-gray-300 hover:text-white transition';
+      }
+
+      const container = document.getElementById('weekend-timeline');
+      container.innerHTML = weekendFormats[type].map((step, i) => `
+        <div class="bg-f1card border border-f1border rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4 hover:border-f1red/60 transition">
+          <div class="flex items-center space-x-3 sm:w-48 shrink-0">
+            <div class="w-11 h-11 rounded-xl bg-f1dark border border-f1border flex items-center justify-center text-xl">${step.icon}</div>
+            <div>
+              <div class="font-racing text-xs text-f1red font-bold">${step.day}</div>
+              <span class="text-[11px] bg-white/10 text-gray-300 px-2 py-0.5 rounded">${step.badge}</span>
+            </div>
+          </div>
+          <div class="flex-1">
+            <h4 class="font-bold text-lg text-white">${step.title}</h4>
+            <p class="text-sm text-gray-300 mt-1 leading-relaxed">${step.desc}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ---------------------------------------------------------
+    // 6. CHAPTER E: 4 MINI-GAMES
+    // ---------------------------------------------------------
+    function switchGameTab(tabName) {
+      document.querySelectorAll('.game-panel').forEach(p => p.classList.add('hidden'));
+      document.getElementById(`game-panel-${tabName}`).classList.remove('hidden');
+
+      document.querySelectorAll('.game-tab-btn').forEach(btn => {
+        if (btn.dataset.gametab === tabName) {
+          btn.className = 'game-tab-btn bg-f1red text-white border border-f1red p-4 rounded-2xl text-left transition shadow-lg';
+        } else {
+          btn.className = 'game-tab-btn bg-f1card text-gray-300 border border-f1border hover:border-f1red p-4 rounded-2xl text-left transition';
+        }
+      });
+
+      if (tabName === 'speed') resizeSpeedCanvas();
+    }
+
+    // --- MINI-GAME 1: SPEED SIMULATOR ---
+    let currentSpeed = 100;
+    let speedCanvas, speedCtx;
+    let roadOffset = 0;
+    let speedParticles = [];
+
+    function initSpeedSim() {
+      speedCanvas = document.getElementById('speed-canvas');
+      if (!speedCanvas) return;
+      speedCtx = speedCanvas.getContext('2d');
+      for (let i = 0; i < 40; i++) {
+        speedParticles.push({
+          x: Math.random() * 800,
+          y: Math.random() * 300,
+          len: 10 + Math.random() * 40,
+          speedMult: 0.8 + Math.random() * 0.6
+        });
+      }
+      resizeSpeedCanvas();
+      animateSpeedSim();
+    }
+
+    function resizeSpeedCanvas() {
+      if (!speedCanvas) return;
+      const rect = speedCanvas.parentElement.getBoundingClientRect();
+      speedCanvas.width = rect.width || 600;
+      speedCanvas.height = rect.height || 260;
+    }
+
+    function setSpeedPreset(val) {
+      document.getElementById('speed-slider').value = val;
+      updateSpeedSim(val);
+    }
+
+    function updateSpeedSim(val) {
+      currentSpeed = parseInt(val, 10);
+      document.getElementById('speed-display').textContent = currentSpeed;
+      const badge = document.getElementById('speed-mode-badge');
+      const desc = document.getElementById('speed-comparison-text');
+      const gforce = document.getElementById('speed-gforce');
+
+      if (currentSpeed === 0) {
+        badge.textContent = '정지 상태 (그리드 대기)';
+        badge.className = 'absolute top-4 right-4 bg-gray-700 px-3 py-1.5 rounded-xl text-xs font-bold text-gray-200';
+        desc.textContent = '출발 신호등 5개가 꺼지기를 기다리는 순간입니다!';
+        gforce.textContent = '1.0 G';
+      } else if (currentSpeed <= 120) {
+        badge.textContent = '일반 승용차 속도 영역';
+        badge.className = 'absolute top-4 right-4 bg-blue-500/20 border border-blue-400 px-3 py-1.5 rounded-xl text-xs font-bold text-blue-300';
+        desc.textContent = `시속 ${currentSpeed}km: 일반 고속도로 주행 속도입니다. F1 머신에겐 몸풀기 수준이죠!`;
+        gforce.textContent = '1.2 G';
+      } else if (currentSpeed <= 260) {
+        badge.textContent = '중고속 코너링 영역';
+        badge.className = 'absolute top-4 right-4 bg-yellow-500/20 border border-yellow-400 px-3 py-1.5 rounded-xl text-xs font-bold text-yellow-300';
+        desc.textContent = `시속 ${currentSpeed}km: 일반 차라면 도로 밖으로 튕겨 나갈 코너를 F1은 다운포스로 꽉 눌러 돌립니다!`;
+        gforce.textContent = '3.5 G';
+      } else {
+        badge.textContent = '🔥 F1 초고속 영역 (X-모드)';
+        badge.className = 'absolute top-4 right-4 bg-f1red px-3 py-1.5 rounded-xl text-xs font-bold text-white animate-pulse';
+        desc.textContent = `시속 ${currentSpeed}km: 1초에 약 ${Math.round(currentSpeed / 3.6)}m를 날아갑니다! 눈 깜빡할 새 축구장 길이를 통과합니다.`;
+        gforce.textContent = '5.0 G+';
+      }
+    }
+
+    function animateSpeedSim() {
+      if (speedCtx && speedCanvas) {
+        const w = speedCanvas.width;
+        const h = speedCanvas.height;
+        speedCtx.clearRect(0, 0, w, h);
+
+        // Sky / Dark background gradient
+        const grad = speedCtx.createLinearGradient(0, 0, 0, h);
+        grad.addColorStop(0, '#0B0B10');
+        grad.addColorStop(0.55, '#181824');
+        grad.addColorStop(1, '#101018');
+        speedCtx.fillStyle = grad;
+        speedCtx.fillRect(0, 0, w, h);
+
+        // Perspective Road Lines
+        const horizonY = h * 0.48;
+        speedCtx.strokeStyle = 'rgba(255,255,255,0.15)';
+        speedCtx.lineWidth = 2;
+        speedCtx.beginPath();
+        speedCtx.moveTo(w * 0.45, horizonY);
+        speedCtx.lineTo(0, h);
+        speedCtx.moveTo(w * 0.55, horizonY);
+        speedCtx.lineTo(w, h);
+        speedCtx.stroke();
+
+        // Moving Kerbs & Center Line
+        roadOffset = (roadOffset + currentSpeed * 0.14) % 60;
+        speedCtx.strokeStyle = currentSpeed > 260 ? '#E10600' : '#FFFFFF';
+        speedCtx.lineWidth = 3;
+        speedCtx.setLineDash([25, 35]);
+        speedCtx.lineDashOffset = -roadOffset;
+        speedCtx.beginPath();
+        speedCtx.moveTo(w * 0.5, horizonY);
+        speedCtx.lineTo(w * 0.5, h);
+        speedCtx.stroke();
+        speedCtx.setLineDash([]);
+
+        // Wind / Speed Particles
+        if (currentSpeed > 10) {
+          speedParticles.forEach(p => {
+            p.x -= (currentSpeed * 0.12) * p.speedMult;
+            if (p.x < -100) {
+              p.x = w + 50;
+              p.y = Math.random() * h;
+            }
+            const stretch = Math.max(8, (currentSpeed / 350) * 140);
+            speedCtx.strokeStyle = currentSpeed > 260 ? 'rgba(225, 6, 0, 0.55)' : 'rgba(255, 255, 255, 0.25)';
+            speedCtx.lineWidth = currentSpeed > 260 ? 2.5 : 1.5;
+            speedCtx.beginPath();
+            speedCtx.moveTo(p.x, p.y);
+            speedCtx.lineTo(p.x + stretch, p.y);
+            speedCtx.stroke();
+          });
+        }
+
+        // Camera Shake Effect at High Speed
+        const shakeX = currentSpeed > 240 ? (Math.random() - 0.5) * ((currentSpeed - 240) / 30) : 0;
+        const shakeY = currentSpeed > 240 ? (Math.random() - 0.5) * ((currentSpeed - 240) / 30) : 0;
+
+        // Draw Rear Wing / Car Silhouette in Center Bottom
+        const cx = w * 0.5 + shakeX;
+        const cy = h * 0.72 + shakeY;
+        speedCtx.fillStyle = '#E10600';
+        speedCtx.beginPath();
+        speedCtx.roundRect(cx - 55, cy - 18, 110, 12, 4);
+        speedCtx.fill();
+        speedCtx.fillStyle = '#1F1F2E';
+        speedCtx.fillRect(cx - 42, cy - 6, 8, 22);
+        speedCtx.fillRect(cx + 34, cy - 6, 8, 22);
+        // Rear Rain Light Blinking at High Speed
+        if (currentSpeed > 200 && Math.floor(Date.now() / 120) % 2 === 0) {
+          speedCtx.fillStyle = '#FF2A2A';
+          speedCtx.beginPath();
+          speedCtx.arc(cx, cy + 12, 6, 0, Math.PI * 2);
+          speedCtx.fill();
+        }
+      }
+      requestAnimationFrame(animateSpeedSim);
+    }
+
+    // --- MINI-GAME 2: PITSTOP CHALLENGE ---
+    let pitActive = false;
+    let pitStartTime = 0;
+    let pitTimerInterval = null;
+    let tiresChanged = new Set();
+    let bestPitRecord = null;
+
+    function startPitstopGame() {
+      pitActive = true;
+      tiresChanged.clear();
+      pitStartTime = performance.now();
+
+      document.getElementById('pit-start-btn').disabled = true;
+      document.getElementById('pit-start-btn').classList.add('opacity-50');
+      document.getElementById('pit-status-banner').innerHTML = `<span class="bg-f1red text-white px-4 py-1.5 rounded-full text-sm font-bold animate-pulse">빨리 4개 타이어를 모두 터치하세요!</span>`;
+
+      document.querySelectorAll('.pit-tire').forEach(btn => {
+        btn.disabled = false;
+        btn.classList.remove('bg-emerald-600', 'border-emerald-300');
+        btn.classList.add('bg-gray-800', 'border-f1red');
+        btn.querySelector('span:last-child').textContent = '교체 필요!';
+        btn.querySelector('span:last-child').className = 'text-[10px] text-red-400 font-bold';
+      });
+
+      clearInterval(pitTimerInterval);
+      pitTimerInterval = setInterval(() => {
+        const elapsed = (performance.now() - pitStartTime) / 1000;
+        document.getElementById('pit-current-timer').textContent = `${elapsed.toFixed(2)}s`;
+      }, 20);
+    }
+
+    function changeTire(tireId) {
+      if (!pitActive || tiresChanged.has(tireId)) return;
+      tiresChanged.add(tireId);
+
+      const btn = document.getElementById(`tire-${tireId}`);
+      btn.classList.remove('bg-gray-800', 'border-f1red');
+      btn.classList.add('bg-emerald-600', 'border-emerald-300');
+      btn.querySelector('span:last-child').textContent = 'NEW OK!';
+      btn.querySelector('span:last-child').className = 'text-[10px] text-white font-bold';
+
+      if (tiresChanged.size === 4) {
+        finishPitstopGame();
+      }
+    }
+
+    function finishPitstopGame() {
+      pitActive = false;
+      clearInterval(pitTimerInterval);
+      const finalTime = (performance.now() - pitStartTime) / 1000;
+      document.getElementById('pit-current-timer').textContent = `${finalTime.toFixed(2)}s`;
+
+      if (bestPitRecord === null || finalTime < bestPitRecord) {
+        bestPitRecord = finalTime;
+        document.getElementById('pit-best-record').textContent = `${bestPitRecord.toFixed(2)}s`;
+      }
+
+      let rating = '';
+      if (finalTime <= 1.9) rating = '🏆 세계 신기록급! 실제 F1 미캐닉 수준입니다!';
+      else if (finalTime <= 2.6) rating = '⚡ 훌륭해요! 프로 F1 팀의 평균 피트스톱 속도입니다!';
+      else if (finalTime <= 4.0) rating = '👍 좋아요! 조금만 더 연습하면 2초대 진입 가능!';
+      else rating = '🐢 안전 운전도 좋지만 레이스에서는 순위를 뺏길 수 있어요! 다시 도전!';
+
+      document.getElementById('pit-status-banner').innerHTML = `
+        <div class="bg-emerald-500/20 border border-emerald-400 text-emerald-200 px-4 py-2 rounded-xl text-sm font-bold">
+          완료 기록: <span class="font-racing text-white text-lg">${finalTime.toFixed(2)}초</span> — ${rating}
+        </div>
+      `;
+
+      const startBtn = document.getElementById('pit-start-btn');
+      startBtn.disabled = false;
+      startBtn.classList.remove('opacity-50');
+      startBtn.textContent = '🔄 기록 단축 재도전!';
+    }
+
+    // --- MINI-GAME 3: MY F1 TEAM FINDER ---
+    const finderQuestions = [
+      {
+        q: "1. 스포츠 팀을 응원할 때 당신의 스타일은?",
+        options: [
+          { text: "역사와 전통이 깊은 왕조 팀이 좋다", scores: { ferrari: 3, williams: 2, mclaren: 1 } },
+          { text: "압도적인 실력과 승부욕으로 이기는 최강 팀!", scores: { mercedes: 3, redbull: 3 } },
+          { text: "패기 넘치는 젊은 신예들의 성장 스토리가 좋다", scores: { racingbulls: 3, alpine: 2, mclaren: 2 } },
+          { text: "새로운 도전을 시작하는 신생팀이나 다크호스 응원!", scores: { audi: 3, cadillac: 3, astonmartin: 2, haas: 2 } }
+        ]
+      },
+      {
+        q: "2. 가장 끌리는 컬러와 분위기는?",
+        options: [
+          { text: "열정적인 이탈리안 레드", scores: { ferrari: 3, audi: 2 } },
+          { text: "시원한 실버 & 민트 에메랄드", scores: { mercedes: 3, astonmartin: 2 } },
+          { text: "에너제틱한 오렌지 & 블루", scores: { mclaren: 3, redbull: 2, williams: 2 } },
+          { text: "세련된 블랙 & 골드 / 핑크 포인트", scores: { cadillac: 3, alpine: 3, haas: 2 } }
+        ]
+      },
+      {
+        q: "3. 경기에서 가장 보고 싶은 명장면은?",
+        options: [
+          { text: "전설적인 베테랑 챔피언의 노련한 레이스", scores: { ferrari: 2, astonmartin: 3, cadillac: 2 } },
+          { text: "거침없이 틈을 파고드는 공격적인 추월 쇼", scores: { redbull: 3, racingbulls: 2, mclaren: 2 } },
+          { text: "치밀한 전략과 완벽한 팀워크로 역전승", scores: { mercedes: 2, williams: 3, haas: 2 } },
+          { text: "신규 엔진과 기술력으로 판도를 뒤집는 반란", scores: { audi: 3, cadillac: 2, alpine: 2 } }
+        ]
+      }
+    ];
+
+    let finderStep = 0;
+    let finderScores = {};
+
+    function initTeamFinder() {
+      finderStep = 0;
+      finderScores = {};
+      renderTeamFinder();
+    }
+
+    function renderTeamFinder() {
+      const container = document.getElementById('team-finder-container');
+      if (finderStep < finderQuestions.length) {
+        const current = finderQuestions[finderStep];
+        container.innerHTML = `
+          <div class="bg-f1dark border border-f1border rounded-2xl p-6">
+            <div class="flex justify-between items-center text-xs text-gray-400 mb-3">
+              <span>질문 ${finderStep + 1} / ${finderQuestions.length}</span>
+              <span class="font-racing text-f1red">${Math.round(((finderStep + 1) / finderQuestions.length) * 100)}%</span>
+            </div>
+            <h4 class="text-lg sm:text-xl font-bold text-white mb-5">${current.q}</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              ${current.options.map((opt, idx) => `
+                <button onclick="answerTeamFinder(${idx})" class="text-left p-4 rounded-xl bg-f1card hover:bg-f1red/20 border border-f1border hover:border-f1red transition text-sm font-medium text-gray-200 hover:text-white">
+                  ${opt.text}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      } else {
+        // Calculate Winner Team
+        let bestId = 'ferrari';
+        let maxScore = -1;
+        for (const [teamId, sc] of Object.entries(finderScores)) {
+          if (sc > maxScore) {
+            maxScore = sc;
+            bestId = teamId;
+          }
+        }
+        const matchedTeam = teams2026.find(t => t.id === bestId) || teams2026[0];
+        container.innerHTML = `
+          <div class="bg-gradient-to-br from-f1dark to-black border-2 rounded-3xl p-6 sm:p-8 text-center relative overflow-hidden" style="border-color: ${matchedTeam.color};">
+            <div class="text-xs font-racing tracking-widest uppercase mb-2" style="color: ${matchedTeam.color};">2026 OFFICIAL FAN PASS</div>
+            <h4 class="text-2xl sm:text-3xl font-black text-white mb-2">당신의 운명의 팀은 <span style="color: ${matchedTeam.color};">${matchedTeam.short}</span>!</h4>
+            <p class="text-sm text-gray-300 max-w-xl mx-auto mb-6">${matchedTeam.summary}</p>
+
+            <!-- Custom Fan Card -->
+            <div class="max-w-md mx-auto bg-f1card border border-white/15 rounded-2xl p-5 text-left shadow-2xl mb-6">
+              <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+                <div>
+                  <div class="text-[10px] text-gray-400 font-racing">TEAM</div>
+                  <div class="font-bold text-white">${matchedTeam.name}</div>
+                </div>
+                <span class="w-4 h-4 rounded-full" style="background-color: ${matchedTeam.color};"></span>
+              </div>
+              <div class="text-xs text-gray-400 mb-1">내가 응원할 2026 드라이버</div>
+              <div class="flex gap-2">
+                ${matchedTeam.drivers.map(d => `
+                  <span class="bg-f1dark px-3 py-1.5 rounded-lg text-xs font-bold text-white border border-white/10">
+                    #${d.num} ${d.name}
+                  </span>
+                `).join('')}
+              </div>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-3">
+              <button onclick="openTeamModal('${matchedTeam.id}')" class="bg-white text-black font-bold px-5 py-2.5 rounded-xl text-sm hover:bg-gray-200 transition">
+                팀 상세 프로필 보기
+              </button>
+              <button onclick="initTeamFinder()" class="bg-f1card border border-f1border text-white font-bold px-5 py-2.5 rounded-xl text-sm hover:border-f1red transition">
+                다시 테스트하기
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function answerTeamFinder(optIdx) {
+      const current = finderQuestions[finderStep];
+      const chosen = current.options[optIdx];
+      for (const [teamId, pts] of Object.entries(chosen.scores)) {
+        finderScores[teamId] = (finderScores[teamId] || 0) + pts;
+      }
+      finderStep++;
+      renderTeamFinder();
+    }
+
+    // --- MINI-GAME 4: RACE ORDER GAME ---
+    const correctRaceOrder = [
+      { id: 'fp', label: '1단계: 연습주행 (Practice)', hint: '금요일~토요일 오전, 서킷 적응 및 차 세팅' },
+      { id: 'quali', label: '2단계: 예선 / 퀄리파잉 (Qualifying)', hint: '토요일 오후, 가장 빠른 1바퀴로 출발 순서 결정' },
+      { id: 'race', label: '3단계: 결승 레이스 (Grand Prix Race)', hint: '일요일 본경기, 약 305km 완주 대결' },
+      { id: 'podium', label: '4단계: 포디엄 시상식 (Podium)', hint: '1·2·3위 트로피 수여 및 샴페인 세리머니' }
+    ];
+    let shuffledOrderItems = [];
+    let selectedOrderItems = [];
+
+    function initOrderGame() {
+      selectedOrderItems = [];
+      shuffledOrderItems = [...correctRaceOrder].sort(() => Math.random() - 0.5);
+      renderOrderGame();
+    }
+
+    function renderOrderGame() {
+      const container = document.getElementById('order-game-container');
+      const remaining = shuffledOrderItems.filter(item => !selectedOrderItems.some(s => s.id === item.id));
+
+      let resultHtml = '';
+      if (selectedOrderItems.length === 4) {
+        const isCorrect = selectedOrderItems.every((item, idx) => item.id === correctRaceOrder[idx].id);
+        if (isCorrect) {
+          resultHtml = `
+            <div class="p-4 rounded-2xl bg-emerald-500/20 border border-emerald-400 text-emerald-200 text-sm">
+              <strong>🎉 정답입니다! 완벽해요!</strong><br/>
+              연습주행으로 감을 잡고 → 예선으로 출발 자리를 정한 뒤 → 일요일 결승 레이스를 치르고 → 포디엄에서 샴페인을 터뜨립니다!
+            </div>
+          `;
+        } else {
+          resultHtml = `
+            <div class="p-4 rounded-2xl bg-f1red/20 border border-f1red text-red-200 text-sm">
+              <strong>😅 순서가 조금 헷갈렸네요!</strong><br/>
+              정답 순서는 <strong>[연습주행 → 예선(퀄리파잉) → 결승 레이스 → 포디엄 시상식]</strong>입니다. 아래 초기화 버튼을 눌러 다시 맞춰보세요!
+            </div>
+          `;
+        }
+      }
+
+      container.innerHTML = `
+        <div>
+          <div class="text-xs font-bold text-gray-400 mb-2">👇 아래 보기를 순서대로 클릭하세요 (${selectedOrderItems.length}/4 선택됨)</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            ${remaining.map(item => `
+              <button onclick="pickOrderItem('${item.id}')" class="p-4 rounded-xl bg-f1dark hover:bg-f1red/20 border border-f1border hover:border-f1red text-left transition">
+                <div class="font-bold text-white text-sm">${item.label.split(': ')[1]}</div>
+                <div class="text-xs text-gray-400 mt-0.5">${item.hint}</div>
+              </button>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="bg-f1dark border border-f1border rounded-2xl p-4">
+          <div class="flex justify-between items-center mb-3">
+            <span class="text-xs font-bold text-gray-300">내가 선택한 그랑프리 진행 순서</span>
+            <button onclick="initOrderGame()" class="text-xs text-f1red hover:underline font-bold">🔄 처음부터 다시</button>
+          </div>
+          <div class="space-y-2">
+            ${[0, 1, 2, 3].map(slotIdx => {
+              const picked = selectedOrderItems[slotIdx];
+              return picked
+                ? `<div class="p-3 rounded-xl bg-f1card border border-white/20 flex items-center justify-between">
+                    <span class="font-bold text-sm text-white"><span class="text-f1red font-racing mr-2">${slotIdx + 1}.</span>${picked.label.split(': ')[1]}</span>
+                    <span class="text-xs text-gray-400">${picked.hint}</span>
+                   </div>`
+                : `<div class="p-3 rounded-xl border border-dashed border-gray-700 text-xs text-gray-500">${slotIdx + 1}번째 순서를 선택해주세요</div>`;
+            }).join('')}
+          </div>
+        </div>
+        ${resultHtml}
+      `;
+    }
+
+    function pickOrderItem(id) {
+      const found = shuffledOrderItems.find(i => i.id === id);
+      if (found && selectedOrderItems.length < 4) {
+        selectedOrderItems.push(found);
+        renderOrderGame();
+      }
+    }
+
+    // ---------------------------------------------------------
+    // 7. CHAPTER F: BROADCAST TIMING BOARD EXPLAINER
+    // ---------------------------------------------------------
+    const broadcastTerms = {
+      pos: {
+        badge: 'POS (Position)',
+        title: '현재 실시간 순위',
+        desc: '1위부터 22위까지 현재 서킷을 달리고 있는 순서를 보여줍니다. 출발할 때는 예선 순위대로 서지만, 추월과 피트스톱 전략에 따라 매 바퀴 순위가 뒤바뀝니다!'
+      },
+      driver: {
+        badge: 'DRIVER (3글자 약어)',
+        title: '드라이버 이름 약어 & 팀 컬러',
+        desc: '드라이버 성(Last Name)의 앞 3글자를 표시합니다. 예: ANT(안토넬리), LEC(르클레르), VER(베르스타펜), NOR(노리스), HAM(해밀턴). 왼쪽의 세로 색깔 막대는 소속 팀을 나타냅니다.'
+      },
+      gap: {
+        badge: 'GAP / INTERVAL',
+        title: '1위와의 시간 격차 (초 단위)',
+        desc: 'F1은 거리가 아니라 ‘시간(초)’으로 격차를 표시합니다! 예를 들어 2위 옆에 +0.842라고 뜨면 1위보다 0.842초 뒤에서 바짝 추격 중이라는 뜻입니다. 1초 이내로 좁혀지면 추월 찬스가 옵니다!'
+      },
+      tire: {
+        badge: 'TYRE (S / M / H)',
+        title: '현재 장착 중인 타이어 종류',
+        desc: '빨간 S(소프트 - 빠름), 노란 M(미디엄 - 균형), 하얀 H(하드 - 오래감)를 뜻합니다. 다른 드라이버들이 어떤 타이어를 끼고 있는지 비교하면 누가 곧 타이어를 갈러 들어올지 예측할 수 있습니다.'
+      },
+      pit: {
+        badge: 'IN PIT / PIT 횟수',
+        title: '타이어 교체(피트스톱) 진입 표시',
+        desc: '드라이버가 타이어를 교체하기 위해 경기장 옆 정비 구역(피트 레인)으로 들어오면 ‘IN PIT’ 표시가 뜹니다. 오른쪽 숫자는 지금까지 총 몇 번 타이어를 교체했는지 보여줍니다.'
+      },
+      sc: {
+        badge: 'SC (Safety Car · 세이프티 카)',
+        title: '사고 발생! 모든 차가 속도를 줄이는 상황',
+        desc: '트랙 위에 사고나 파편이 생기면 안전을 위해 특수 차량인 ‘세이프티 카(SC)’가 출동합니다. SC가 떠 있는 동안에는 추월이 금지되며, 1위부터 꼴찌까지 간격이 좁혀져 레이스 판도가 완전히 뒤집히는 변수 역할을 합니다!'
+      },
+      dnf: {
+        badge: 'DNF (Did Not Finish)',
+        title: '차량 고장이나 사고로 인한 중도 포기(리타이어)',
+        desc: '‘완주하지 못함’이라는 뜻입니다. 차량 결함이나 충돌 사고로 더 이상 경기를 이어갈 수 없을 때 표시됩니다.'
+      },
+      drs_override: {
+        badge: '2026 OVERTAKE MODE',
+        title: '2026년 새로 도입된 추월 부스트 모드',
+        desc: '앞차와 1초 이내로 접근하면 활성화되는 2026년 신규 기능입니다! 과거의 DRS(날개 개방 추월) 대신, 뒤따르는 차가 추가 전기 에너지를 더 높은 속도까지 쏟아부어 짜릿한 추월을 시도할 수 있게 해줍니다.'
+      }
+    };
+
+    function explainBroadcast(key) {
+      const info = broadcastTerms[key] || broadcastTerms.gap;
+      const box = document.getElementById('broadcast-explanation-box');
+      box.innerHTML = `
+        <div class="inline-block bg-f1red text-white font-racing font-bold text-xs px-3 py-1 rounded-full mb-3">
+          ${info.badge}
+        </div>
+        <h3 class="text-xl sm:text-2xl font-black text-white mb-2">${info.title}</h3>
+        <p class="text-sm text-gray-300 leading-relaxed">${info.desc}</p>
+        <div class="mt-4 pt-3 border-t border-f1border text-xs text-gray-400">
+          💡 왼쪽 중계 순위표의 다른 숫자나 글자도 클릭해보세요!
+        </div>
+      `;
+    }
+
+    // ---------------------------------------------------------
+    // 8. CHAPTER G: 10-QUESTION BEGINNER QUIZ
+    // ---------------------------------------------------------
+    const quizQuestions = [
+      {
+        q: "1. 2026년 F1 시즌에 참가하는 총 팀(컨스트럭터) 수는 몇 개일까요?",
+        options: ["8개 팀", "10개 팀", "11개 팀 (아우디·캐딜락 합류)", "15개 팀"],
+        answer: 2,
+        exp: "2026년에는 아우디와 캐딜락이 합류하면서 총 11개 팀, 22명의 드라이버가 경쟁합니다!"
+      },
+      {
+        q: "2. F1 타이어 중 가장 빠르지만 수명이 짧아 빨리 닳는 타이어의 색깔은?",
+        options: ["빨간색 (소프트)", "하얀색 (하드)", "파란색 (웨트)", "검은색"],
+        answer: 0,
+        exp: "빨간색(SOFT)은 접지력이 가장 강해 기록 단축에 유리하지만 금방 마모됩니다."
+      },
+      {
+        q: "3. 토요일에 가장 빠른 한 바퀴 기록을 겨뤄 일요일 결승 출발 순서를 정하는 세션은?",
+        options: ["연습주행 (Practice)", "예선 / 퀄리파잉 (Qualifying)", "포디엄 (Podium)", "피트스톱 (Pitstop)"],
+        answer: 1,
+        exp: "토요일 오후에 열리는 퀄리파잉(예선) 1위 드라이버가 결승전 맨 앞자리(폴 포지션)에서 출발합니다."
+      },
+      {
+        q: "4. F1 자동차가 시속 250km 이상에서도 코너를 미끄러지지 않고 도는 가장 큰 이유는?",
+        options: ["바퀴에 스파이크가 박혀 있어서", "공기가 차를 아래로 누르는 ‘다운포스’ 덕분에", "차 무게가 3톤이나 나가서", "자동 운전 AI가 핸들을 돌려서"],
+        answer: 1,
+        exp: "프론트 윙과 리어 윙이 만들어내는 강력한 다운포스가 차체를 아스팔트에 꽉 눌러줍니다."
+      },
+      {
+        q: "5. 중계 화면 순위표에서 2위 드라이버 옆에 ‘+0.750’이라고 표시되어 있다면 무슨 뜻일까요?",
+        options: ["연료가 0.750리터 남았다", "1위보다 0.750초 뒤에서 추격 중이다", "벌점 0.750점을 받았다", "타이어를 750번 바꿨다"],
+        answer: 1,
+        exp: "F1은 앞차와의 거리를 ‘시간(초)’으로 표시합니다. 1초 이내면 추월이 가능한 초접전 상황입니다!"
+      },
+      {
+        q: "6. 2026년 F1 파워유닛(엔진) 규정의 가장 큰 변화는 무엇인가요?",
+        options: ["100% 디젤 엔진만 사용한다", "가솔린 엔진 50% : 전기 출력 50% 비율로 대폭 전동화되었다", "페달을 밟아 인력으로 달린다", "엔진 크기가 5배 커졌다"],
+        answer: 1,
+        exp: "2026년부터 전기 모터 출력이 기존 대비 약 3배 강해져 가솔린과 전기가 50:50 비율로 힘을 냅니다."
+      },
+      {
+        q: "7. F1 피트스톱에서 미캐닉들이 4개의 타이어를 모두 교체하는 데 걸리는 평균 시간은?",
+        options: ["약 1.8 ~ 2.5초", "약 15초", "약 1분", "약 5분"],
+        answer: 0,
+        exp: "약 20명의 미캐닉이 동시에 움직여 눈 깜짝할 사이인 2초 안팎에 4바퀴 교체를 끝냅니다."
+      },
+      {
+        q: "8. 중계 화면에 노란색 ‘SC’가 떴을 때 경기장에서는 어떤 일이 벌어질까요?",
+        options: ["모든 차가 최고 속도로 추월 경쟁을 한다", "사고 수습을 위해 세이프티 카가 출동해 속도를 줄이고 추월이 금지된다", "경기가 즉시 종료된다", "관중들이 트랙 위로 들어온다"],
+        answer: 1,
+        exp: "SC(세이프티 카) 상황에서는 안전을 위해 추월이 금지되며, 차들의 간격이 좁혀져 큰 변수가 됩니다."
+      },
+      {
+        q: "9. 2026 시즌 페라리(Ferrari) 팀에서 함께 호흡을 맞추는 두 드라이버는 누구일까요?",
+        options: ["막스 베르스타펜 & 랜도 노리스", "샤를 르클레르 & 루이스 해밀턴", "조지 러셀 & 키미 안토넬리", "페르난도 알론소 & 발테리 보타스"],
+        answer: 1,
+        exp: "페라리의 에이스 샤를 르클레르와 7회 챔피언 루이스 해밀턴이 붉은 머신을 함께 몰고 있습니다."
+      },
+      {
+        q: "10. 중계 화면 순위표에서 ‘DNF’라고 표시된 드라이버는 어떤 상태인가요?",
+        options: ["1등으로 결승선을 통과했다", "사고나 차량 고장으로 경기를 중도 포기(완주 실패)했다", "가장 빠른 랩타임을 기록했다", "신인상을 수상했다"],
+        answer: 1,
+        exp: "DNF는 ‘Did Not Finish’의 약자로, 완주하지 못하고 리타이어했음을 의미합니다."
+      }
+    ];
+
+    let currentQuizIdx = 0;
+    let quizScore = 0;
+    let quizAnswered = false;
+    let selectedOptionIdx = null;
+
+    function initQuiz() {
+      currentQuizIdx = 0;
+      quizScore = 0;
+      quizAnswered = false;
+      selectedOptionIdx = null;
+      renderQuiz();
+    }
+
+    function renderQuiz() {
+      const container = document.getElementById('quiz-container');
+      if (currentQuizIdx >= quizQuestions.length) {
+        let levelTitle = '';
+        let levelBadge = '';
+        let levelDesc = '';
+
+        if (quizScore >= 9) {
+          levelTitle = '🏆 마스터 F1 팬 (그랑프리 직관 준비 완료!)';
+          levelBadge = 'SUPER LICENSE';
+          levelDesc = '대단해요! 이제 실제 F1 생중계를 보면서 친구들에게 전략과 규칙을 설명해줄 수 있는 수준입니다!';
+        } else if (quizScore >= 6) {
+          levelTitle = '🏎️ 루키 드라이버 (F1 입문 성공!)';
+          levelBadge = 'ROOKIE DRIVER';
+          levelDesc = '기본기를 탄탄히 익히셨네요! 이번 주말 F1 하이라이트나 생중계를 보면 훨씬 재미있게 즐기실 수 있어요.';
+        } else {
+          levelTitle = '🛠️ F1 패독 방문객 (조금만 더 알아볼까요?)';
+          levelBadge = 'PADDOCK PASS';
+          levelDesc = '괜찮아요! F1은 직접 보면서 익숙해지는 스포츠입니다. 다시 한 번 도전해 10점 만점에 도전해보세요!';
+        }
+
+        container.innerHTML = `
+          <div class="text-center py-4">
+            <span class="inline-block bg-f1red text-white font-racing font-bold text-xs px-3 py-1 rounded-full mb-3">${levelBadge}</span>
+            <div class="font-racing text-5xl sm:text-6xl font-black text-white my-2">${quizScore} <span class="text-2xl text-gray-400">/ 10</span></div>
+            <h3 class="text-xl sm:text-2xl font-bold text-white mt-3">${levelTitle}</h3>
+            <p class="text-sm text-gray-300 max-w-md mx-auto mt-2 leading-relaxed">${levelDesc}</p>
+
+            <div class="mt-8 flex flex-wrap justify-center gap-3">
+              <button onclick="initQuiz()" class="bg-f1red hover:bg-red-700 text-white font-bold px-6 py-3 rounded-xl transition">
+                🔄 퀴즈 다시 도전하기
+              </button>
+              <button onclick="navigateTo('home')" class="bg-f1dark border border-f1border hover:border-white text-white font-bold px-6 py-3 rounded-xl transition">
+                🏠 처음으로 돌아가기
+              </button>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const qData = quizQuestions[currentQuizIdx];
+      container.innerHTML = `
+        <div class="flex items-center justify-between text-xs text-gray-400 mb-4">
+          <span class="font-racing font-bold text-f1red">QUESTION ${currentQuizIdx + 1} / ${quizQuestions.length}</span>
+          <span>현재 점수: <strong class="text-white">${quizScore}점</strong></span>
+        </div>
+        <div class="w-full h-1.5 bg-f1dark rounded-full mb-6 overflow-hidden">
+          <div class="bg-f1red h-full transition-all" style="width: ${((currentQuizIdx + 1) / quizQuestions.length) * 100}%"></div>
+        </div>
+
+        <h3 class="text-lg sm:text-xl font-bold text-white mb-6 leading-snug">${qData.q}</h3>
+
+        <div class="space-y-3">
+          ${qData.options.map((opt, idx) => {
+            let btnClass = 'bg-f1dark hover:bg-white/5 border-f1border text-gray-200';
+            if (quizAnswered) {
+              if (idx === qData.answer) {
+                btnClass = 'bg-emerald-500/20 border-emerald-400 text-emerald-200 font-bold';
+              } else if (idx === selectedOptionIdx) {
+                btnClass = 'bg-f1red/20 border-f1red text-red-200';
+              } else {
+                btnClass = 'bg-f1dark/50 border-f1border/50 text-gray-500';
+              }
+            }
+            return `
+              <button onclick="submitQuizAnswer(${idx})" ${quizAnswered ? 'disabled' : ''} class="w-full text-left p-4 rounded-xl border ${btnClass} transition flex items-center justify-between">
+                <span class="text-sm sm:text-base">${opt}</span>
+                ${quizAnswered && idx === qData.answer ? '<i class="fa-solid fa-circle-check text-emerald-400"></i>' : ''}
+                ${quizAnswered && idx === selectedOptionIdx && idx !== qData.answer ? '<i class="fa-solid fa-circle-xmark text-f1red"></i>' : ''}
+              </button>
+            `;
+          }).join('')}
+        </div>
+
+        ${quizAnswered ? `
+          <div class="mt-6 p-4 rounded-2xl bg-f1dark border border-f1border text-sm text-gray-300 leading-relaxed">
+            <strong class="${selectedOptionIdx === qData.answer ? 'text-emerald-400' : 'text-f1red'} block mb-1">
+              ${selectedOptionIdx === qData.answer ? '⭕ 정답입니다!' : '❌ 아쉽네요!'}
+            </strong>
+            ${qData.exp}
+          </div>
+          <div class="mt-6 flex justify-end">
+            <button onclick="nextQuizQuestion()" class="bg-f1red hover:bg-red-700 text-white font-bold px-6 py-3 rounded-xl transition flex items-center space-x-2">
+              <span>${currentQuizIdx === quizQuestions.length - 1 ? '최종 결과 보기' : '다음 문제'}</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        ` : ''}
+      `;
+    }
+
+    function submitQuizAnswer(idx) {
+      if (quizAnswered) return;
+      quizAnswered = true;
+      selectedOptionIdx = idx;
+      if (idx === quizQuestions[currentQuizIdx].answer) {
+        quizScore++;
+      }
+      renderQuiz();
+    }
+
+    function nextQuizQuestion() {
+      currentQuizIdx++;
+      quizAnswered = false;
+      selectedOptionIdx = null;
+      renderQuiz();
+    }
+
+    // ---------------------------------------------------------
+    // 9. INITIALIZATION ON WINDOW LOAD
+    // ---------------------------------------------------------
+    window.addEventListener('resize', resizeSpeedCanvas);
+    window.onload = function () {
+      initHeroLines();
+      renderFaq();
+      renderTeams();
+      selectCarPart('frontWing');
+      switchWeekendFormat('standard');
+      initSpeedSim();
+      initTeamFinder();
+      initOrderGame();
+      explainBroadcast('gap');
+      initQuiz();
+    };
+  </script>
+</body>
+</html>
